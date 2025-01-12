@@ -30,7 +30,27 @@ fusion_recipes = {
     frozenset(["Coup simple", "Épée courte"]): "Coup d'estoc a l'épée",
     frozenset(["Coup simple", "Épée longue"]): "Coup droit a l'épée",
     frozenset(["Coup simple", "Dague"]): "Frappe de dague",
-    # Add more recipes as needed...
+    frozenset(["Coup simple", "Hache de guerre"]): "Frappe simple de hache",
+    frozenset(["Coup simple", "Arc"]): "Tir simple",
+    frozenset(["Coup simple", "Bouclier"]): "Coup de bouclier",
+    frozenset(["Coup puissant", "Épée courte"]): "Coup lourd à l'épée",
+    frozenset(["Coup puissant", "Épée longue"]): "Frappe lourde à l'épée",
+    frozenset(["Coup puissant", "Dague"]): "Frappe reversé de dague",
+    frozenset(["Coup puissant", "Hache de guerre"]): "Abattage de hache",
+    frozenset(["Coup puissant", "Arc"]): "Tir violent",
+    frozenset(["Coup puissant", "Bouclier"]): "Charge de bouclier",
+    frozenset(["Parade", "Épée courte"]): "Parade simple d'épée",
+    frozenset(["Parade", "Épée longue"]): "Parade lourde d'épée",
+    frozenset(["Parade", "Dague"]): "Blocage à la dague",
+    frozenset(["Parade", "Hache de guerre"]): "Blocage avec la hache",
+    frozenset(["Parade", "Arc"]): "Blocage avec l'arc",
+    frozenset(["Parade", "Bouclier"]): "Blocage au bouclier",
+    frozenset(["Coup simple", "Magie élémentaire Feu"]): "Boule de feu simple",
+    frozenset(["Coup simple", "Magie élémentaire Air"]): "Bourrasque d'air",
+    frozenset(["Coup simple", "Magie élémentaire Eau"]): "Rafale d'eau",
+    frozenset(["Coup simple", "Magie élémentaire Terre"]): "Jet de pierres",
+    frozenset(["Coup simple", "Magie d'illusion"]): "Créer une illusion simple",
+    frozenset(["Coup simple", "Magie psychique"]): "Décharge mentale",
 }
 
 itemshop_items = ["Potion de soin", "Potion de poison", "Bombe légère", "Bombe lourde", "Bombe fumigène", "Filet"]

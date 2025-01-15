@@ -74,10 +74,10 @@ fusion_recipes = {
     frozenset(["Magie élémentaire Eau", "Bouclier"]): "Bouclier alourdis par l'eau",
     frozenset(["Magie élémentaire Terre", "Épée courte"]): "Épée des saillies rocheuses",
     frozenset(["Magie élémentaire Terre", "Épée longue"]): "Épée des falaises",
-    frozenset(["Magie élémentaire Terre", "Dague"]): "Dague des profondeurs",
-    frozenset(["Magie élémentaire Terre", "Hache de guerre"]): "Hache des marées",
-    frozenset(["Magie élémentaire Terre", "Arc"]): "Arc des courants",
-    frozenset(["Magie élémentaire Terre", "Bouclier"]): "Bouclier alourdis par l'eau",
+    frozenset(["Magie élémentaire Terre", "Dague"]): "Dague des désert",
+    frozenset(["Magie élémentaire Terre", "Hache de guerre"]): "Hache des fissures",
+    frozenset(["Magie élémentaire Terre", "Arc"]): "Arc des plaines",
+    frozenset(["Magie élémentaire Terre", "Bouclier"]): "Bouclier massif de terre",
 }
 
 itemshop_items = ["Potion de soin", "Potion de poison", "Bombe l\u00e9g\u00e8re", "Bombe lourde", "Bombe fumig\u00e8ne", "Filet"]

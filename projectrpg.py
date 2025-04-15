@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+import random
 
 # Global variables
 money = 1000
@@ -8,41 +9,230 @@ selected_items = []
 fusion_results = []
 
 fusion_recipes = {
-    frozenset(["Coup simple", "\u00c9p\u00e9e courte"]): "Coup d'estoc a l'\u00e9p\u00e9e",
-    frozenset(["Coup simple", "\u00c9p\u00e9e longue"]): "Long coup a l'\u00e9p\u00e9e longue",
-    frozenset(["Coup simple", "Dague"]): "Coup de dague",
-    frozenset(["Coup simple", "Hache de guerre"]): "Frappe simple de hache",
-    frozenset(["Coup simple", "Arc"]): "Tir simple",
-    frozenset(["Coup simple", "Bouclier"]): "Coup de bouclier",
-    frozenset(["Coup puissant", "Épée courte"]): "Coup lourd à l'épée",
-    frozenset(["Coup puissant", "Épée longue"]): "Abattage de l'épée longue",
-    frozenset(["Coup puissant", "Dague"]): "Frappe reversé de dague",
-    frozenset(["Coup puissant", "Hache de guerre"]): "Abattage de hache",
-    frozenset(["Coup puissant", "Arc"]): "Tir violent",
-    frozenset(["Coup puissant", "Bouclier"]): "Pillonage de bouclier",
-    frozenset(["Parade", "Épée courte"]): "Parade simple d'épée",
-    frozenset(["Parade", "Épée longue"]): "Parade lourde d'épée",
-    frozenset(["Parade", "Dague"]): "Blocage à la dague",
-    frozenset(["Parade", "Hache de guerre"]): "Blocage avec la hache",
-    frozenset(["Parade", "Arc"]): "Blocage avec l'arc",
-    frozenset(["Parade", "Bouclier"]): "Blocage au bouclier",
-    frozenset(["Coup simple", "Magie élémentaire Feu"]): "Boule de feu simple",
-    frozenset(["Coup simple", "Magie élémentaire Air"]): "Bourrasque d'air",
-    frozenset(["Coup simple", "Magie élémentaire Eau"]): "Rafale d'eau",
-    frozenset(["Coup simple", "Magie élémentaire Terre"]): "Jet de pierres",
-    frozenset(["Coup simple", "Magie d'illusion"]): "Créer une illusion simple",
-    frozenset(["Coup simple", "Magie psychique"]): "Décharge mentale",
-    frozenset(["Coup puissant", "Magie élémentaire Feu"]): "Colonne de flammes",
-    frozenset(["Coup puissant", "Magie élémentaire Air"]): "Tornade localisée",
-    frozenset(["Coup puissant", "Magie élémentaire Eau"]): "Déversement torrentiel",
-    frozenset(["Coup puissant", "Magie élémentaire Terre"]): "Séisme localisé",
-    frozenset(["Coup puissant", "Magie d'illusion"]): "Créer une illusion simple",
-    frozenset(["Coup puissant", "Magie psychique"]): "Emprise mentale",
-    frozenset(["Parade", "Magie élémentaire Feu"]): "Bouclier de feu",
-    frozenset(["Parade", "Magie élémentaire Air"]): "Bouclier d'air",
-    frozenset(["Parade", "Magie élémentaire Eau"]): "Bouclier d'eau",
-    frozenset(["Parade", "Magie élémentaire Terre"]): "Bouclier de terre",
-    frozenset(["Parade", "Magie d'illusion"]): "Illusion de blocage par le bras",
+    frozenset(["Coup simple", "Hache de guerre"]): {
+        "result": "Frappe simple à la hache",
+        "damage": 25,
+        "damage_type": "slashing",
+        "element": "force",
+        "description": "Vous frappez avec votre hache !"
+    },
+    frozenset(["Coup simple", "Arc"]): {
+        "result": "Tir simple",
+        "damage": 20,
+        "damage_type": "piercing",
+        "element": "force",
+        "description": "Vous tirez avec votre arc !"
+    },
+    frozenset(["Coup simple", "Bouclier"]): {
+        "result": "Coup de bouclier",
+        "damage": 15,
+        "damage_type": "contondant",
+        "element": "force",
+        "description": "Vous frappez avec votre bouclier !"
+    },
+    frozenset(["Coup simple", "Épée courte"]): {
+        "result": "Frappe à l'épée",
+        "damage": 20,
+        "damage_type": "slashing",
+        "element": "force",
+        "description": "Vous frappez avec votre épée !"
+    },
+    frozenset(["Coup simple", "Épée longue"]): {
+        "result": "Frappe à l'épée longue",
+        "damage": 25,
+        "damage_type": "slashing",
+        "element": "force",
+        "description": "Vous frappez avec votre longue épée !"
+    },
+    frozenset(["Coup simple", "Dague"]): {
+        "result": "Coup de dague",
+        "damage": 15,
+        "damage_type": "piercing",
+        "element": "force",
+        "description": "Vous assénez un coup avec votre dague !"
+    },
+    frozenset(["Coup puissant", "Épée courte"]): {
+        "result": "Frappe lourde à l'épée",
+        "damage": 45,
+        "damage_type": "slashing",
+        "element": "force",
+        "description": "Vous abattez lourdement votre épée !"
+    },
+    frozenset(["Coup puissant", "Épée longue"]): {
+        "result": "Frappe lourde à l'épée longue",
+        "damage": 50,
+        "damage_type": "slashing",
+        "element": "force",
+        "description": "Vous abattez lourdement votre épée longue !"
+    },
+    frozenset(["Coup puissant", "Dague"]): {
+        "result": "Poignardage lourd",
+        "damage": 25,
+        "damage_type": "piercing",
+        "element": "force",
+        "description": "Vous lacérez avec votre dague !"
+    },
+    frozenset(["Coup puissant", "Hache de guerre"]): {
+        "result": "Abattage de hache",
+        "damage": 45,
+        "damage_type": "slashing",
+        "element": "force",
+        "description": "Vous abattez votre hache !"
+    },
+    frozenset(["Coup puissant", "Arc"]): {
+        "result": "Tir violent",
+        "damage": 40,
+        "damage_type": "piercing",
+        "element": "force",
+        "description": "Vous décochez une flèche à pleine puissance !"
+    },
+    frozenset(["Coup puissant", "Bouclier"]): {
+        "result": "Pillonage de bouclier",
+        "damage": 25,
+        "damage_type": "contondant",
+        "element": "force",
+        "description": "Vous abbattez votre bouclier violemment !"
+    },
+    frozenset(["Parade", "Épée courte"]): {
+        "result": "Parade à l'épée",
+        "damage": 10,
+        "damage_type": "slashing",
+        "element": "force",
+        "description": "Vous prenez une posture défensive à l'épée!"
+    },
+    frozenset(["Parade", "Épée longue"]): {
+        "result": "Parade avec épée lourde",
+        "damage": 15,
+        "damage_type": "slashing",
+        "element": "force",
+        "description": "
+    },
+    frozenset(["Parade", "Dague"]): {
+        "result": "Blocage à la dague",
+        "damage": 5,
+        "damage_type": "piercing",
+        "element": "force"
+    },
+    frozenset(["Parade", "Hache de guerre"]): {
+        "result": "Blocage à la hache",
+        "damage": 15,
+        "damage_type": "slashing",
+        "element": "force"
+    },
+    frozenset(["Parade", "Arc"]): {
+        "result": "Blocage avec l'arc",
+        "damage": 10,
+        "damage_type": "slashing",
+        "element": "force"
+    },
+    frozenset(["Parade", "Bouclier"]): {
+        "result": "Blocage au bouclier",
+        "damage": 5,
+        "damage_type": "contondant",
+        "element": "force"
+    },
+    frozenset(["Coup simple", "Magie élémentaire Feu"]): {
+        "result": "Boule de feu simple",
+        "damage": 25,
+        "damage_type": "magic",
+        "element": "fire"
+    },
+    frozenset(["Coup simple", "Magie élémentaire Air"]): {
+        "result": "Bourrasque",
+        "damage": 20,
+        "damage_type": "magic",
+        "element": "wind"
+    },
+    frozenset(["Coup simple", "Magie élémentaire Eau"]): {
+        "result": "Jet d'eau",
+        "damage": 20,
+        "damage_type": "magic",
+        "element": "water"
+    },
+    frozenset(["Coup simple", "Magie élémentaire Terre"]): {
+        "result": "Frappe de terre",
+        "damage": 20,
+        "damage_type": "magic",
+        "element": "earth"
+    },
+    frozenset(["Coup simple", "Magie d'illusion"]): {
+        "result": "Illusion simple",
+        "damage": 0,
+        "damage_type": "state",
+        "element": "illusion"
+    },
+    frozenset(["Coup simple", "Magie psychique"]): {
+        "result": "Décharge mentale",
+        "damage": 10,
+        "damage_type": "magic",
+        "element": "psychic"
+    },
+    frozenset(["Coup puissant", "Magie élémentaire Feu"]): {
+        "result": "Colonne de flamme",
+        "damage": 45,
+        "damage_type": "magic",
+        "element": "fire"
+    },
+    frozenset(["Coup puissant", "Magie élémentaire Air"]): {
+        "result": "Tornade",
+        "damage": 40,
+        "damage_type": "magic",
+        "element": "wind"
+    },
+    frozenset(["Coup puissant", "Magie élémentaire Eau"]): {
+        "result": "Tsunami",
+        "damage": 40,
+        "damage_type": "magic",
+        "element": "water"
+    },
+    frozenset(["Coup puissant", "Magie élémentaire Terre"]): {
+        "result": "Séisme",
+        "damage": 40,
+        "damage_type": "magic",
+        "element": "earth"
+    },
+    frozenset(["Coup puissant", "Magie d'illusion"]): {
+        "result": "Image rémanente",
+        "damage": 0,
+        "damage_type": "state",
+        "element": "illusion"
+    },
+    frozenset(["Coup puissant", "Magie psychique"]): {
+        "result": "Emprise mentale",
+        "damage": 20,
+        "damage_type": "magic",
+        "element": "psychic"
+    },
+    frozenset(["Parade", "Magie élémentaire Feu"]): {
+        "result": "Bouclier de feu",
+        "damage": 15,
+        "damage_type": "magic",
+        "element": "fire"
+    },
+    frozenset(["Parade", "Magie élémentaire Air"]): {
+        "result": "Bouclier d'air",
+        "damage": 10,
+        "damage_type": "magic",
+        "element": "wind"
+    },
+    frozenset(["Parade", "Magie élémentaire Eau"]): {
+        "result": "Bouclier d'eau",
+        "damage": 10,
+        "damage_type": "magic",
+        "element": "eau"
+    },
+    frozenset(["Parade", "Magie élémentaire Terre"]): {
+        "result": "Bouclier de terre",
+        "damage": 10,
+        "damage_type": "magic",
+        "element": "earth"
+    },
+    frozenset(["Parade", "Magie d'illusion"]): {
+        "result": "Illusion du bras",
+        "damage": 0,
+        "damage_type": "state",
+        "element": "psychic"
+    },
     frozenset(["Parade", "Magie psychique"]): "Perturbation psychique",
     frozenset(["Magie élémentaire Feu", "Magie élémentaire Feu"]): "Feu éternel",
     frozenset(["Magie élémentaire Feu", "Magie élémentaire Air"]): "Tempête de feu",
@@ -78,6 +268,28 @@ fusion_recipes = {
     frozenset(["Magie élémentaire Terre", "Hache de guerre"]): "Hache des fissures",
     frozenset(["Magie élémentaire Terre", "Arc"]): "Arc des plaines",
     frozenset(["Magie élémentaire Terre", "Bouclier"]): "Bouclier massif de terre",
+    frozenset(["Potion de soin", "Potion de soin"]): "Potion de soin supérieure",
+    frozenset(["Potion de soin", "Potion de poison"]): "Potion de poison auto soignant",
+    frozenset(["Potion de soin", "Bombe l\u00e9g\u00e8re"]): "Bombe de soin",
+    frozenset(["Potion de soin", "Bombe lourde"]): "Bombe puissante de soin",
+    frozenset(["Potion de soin", "Bombe fumig\u00e8ne"]): "Bombe de fumée soignante",
+    frozenset(["Potion de soin", "Filet"]): "Filet soignant",
+    frozenset(["Potion de poison", "Potion de poison"]): "Potion de poison puissante",
+    frozenset(["Potion de poison", "Bombe l\u00e9g\u00e8re"]): "Bombe de poison",
+    frozenset(["Potion de poison", "Bombe lourde"]): "Bombe puissante de poison",
+    frozenset(["Potion de poison", "Bombe fumig\u00e8ne"]): "Bombe de fumée empoisonnante",
+    frozenset(["Potion de poison", "Filet"]): "Filet empoisonné",
+    frozenset(["Bombe l\u00e9g\u00e8re", "Bombe l\u00e9g\u00e8re"]): "Bombe lourde",
+    frozenset(["Bombe l\u00e9g\u00e8re", "Bombe lourde"]): "Bombe lourde puissante",
+    frozenset(["Bombe l\u00e9g\u00e8re", "Bombe fumig\u00e8ne"]): "Bombe de fumée explosive",
+    frozenset(["Bombe l\u00e9g\u00e8re", "Filet"]): "Filet explosif",
+    frozenset(["Bombe lourde", "Bombe lourde"]): "Bombe massive",
+    frozenset(["Bombe lourde", "Bombe fumig\u00e8ne"]): "Bombe lourde de fumée explosive",
+    frozenset(["Bombe lourde", "Filet"]): "Filet explosif",
+    frozenset(["Bombe fumig\u00e8ne", "Bombe fumig\u00e8ne"]): "Bombe lourde de fumée",
+    frozenset(["Bombe fumig\u00e8ne", "Filet"]): "Filet enfumé",
+    frozenset(["Filet", "Filet"]): "Filet tentaculaire",
+
 }
 
 itemshop_items = ["Potion de soin", "Potion de poison", "Bombe l\u00e9g\u00e8re", "Bombe lourde", "Bombe fumig\u00e8ne", "Filet"]
@@ -137,6 +349,11 @@ class ShopWindow:
 
     def handle_purchase(self, item_name, cost):
         global money
+        # Check if the item has already been purchased and is not from the itemshop
+        if item_name in purchased_items and item_name not in itemshop_items:
+            messagebox.showwarning("Achat refusé", f"Vous avez déjà acheté {item_name}.")
+            return
+
         if money >= cost:
             money -= cost
             purchased_items.append(item_name)
@@ -144,6 +361,7 @@ class ShopWindow:
             self.money_label.config(text=f"Argent: {money} deullars")
         else:
             messagebox.showerror("Erreur", "Pas assez d'argent !")
+
 
 def toggle_item_display(item_name, display_label):
     if item_name in selected_items:
@@ -156,16 +374,21 @@ def handle_fusion(display_label, result_label, items_frame):
     global fusion_results
     selected_set = frozenset(selected_items)
     if selected_set in fusion_recipes:
-        result = fusion_recipes[selected_set]
+        recipe = fusion_recipes[selected_set]
+        result = recipe["result"]
+        damage = recipe["damage"]
+        damage_type = recipe["damage_type"]
+        element = recipe["element"]
+
         if result in fusion_results:
             result_label.config(
-                text="\u00c9chec de la fusion : Cette fusion a d\u00e9j\u00e0 \u00e9t\u00e9 r\u00e9alis\u00e9e.", fg="red"
+                text="Échec de la fusion : Cette fusion a déjà été réalisée.", fg="red"
             )
         else:
             fusion_results.append(result)
 
-            # Remove items used in the fusion if they are shop items
-            for item in selected_set:
+            # Remove only one instance of each item used in fusion (if it's a shop item)
+            for item in selected_items:
                 if item in itemshop_items and item in purchased_items:
                     purchased_items.remove(item)
 
@@ -182,59 +405,144 @@ def handle_fusion(display_label, result_label, items_frame):
 
             update_main_window()
             result_label.config(
-                text=f"Fusion r\u00e9ussie ! Vous avez cr\u00e9\u00e9 : {result}", fg="green"
+                text=f"Fusion réussie ! Vous avez créé : {result}\n"
+                     f"Statistiques :\n"
+                     f"Dégâts : {damage}\n"
+                     f"Élément : {element}",
+                fg="green"
             )
     else:
         result_label.config(
-            text="\u00c9chec de la fusion : La combinaison actuelle ne donne aucun r\u00e9sultat.",
+            text="Échec de la fusion : La combinaison actuelle ne donne aucun résultat.",
             fg="red",
         )
 
     # Clear the selected items
     selected_items.clear()
-    display_label.config(text="Aucun \u00e9l\u00e9ment s\u00e9lectionn\u00e9")
+    display_label.config(text="Aucun élément sélectionné")
 
+def add_to_fusion(item_name, display_label):
+    selected_items.append(item_name)
+    display_label.config(text=", ".join(selected_items))
+
+
+# Fonction pour effacer la sélection
+def clear_selection(display_label):
+    selected_items.clear()
+    display_label.config(text="Aucun élément sélectionné")
+
+# Fenêtre de création de compétences
 def open_skills_creation_window():
-    skills_window = tk.Toplevel(window)
-    skills_window.title("Cr\u00e9ation des comp\u00e9tences")
-    skills_window.geometry("600x400")
+    skills_window = tk.Toplevel()
+    skills_window.title("Création des compétences")
+    skills_window.geometry("900x600")
 
-    tk.Label(skills_window, text="Cr\u00e9ation des comp\u00e9tences", font=("Verdana", 14)).pack(pady=20)
+    tk.Label(skills_window, text="Création des compétences", font=("Verdana", 14)).pack(pady=20)
 
-    display_label = tk.Label(skills_window, text="Aucun \u00e9l\u00e9ment s\u00e9lectionn\u00e9", font=("Verdana", 12), wraplength=500)
+    display_label = tk.Label(skills_window, text="Aucun élément sélectionné", font=("Verdana", 12), wraplength=500)
     display_label.pack(pady=10)
+
+    clear_button = tk.Button(
+        skills_window,
+        text="Effacer la sélection",
+        font=("Verdana", 10),
+        command=lambda: clear_selection(display_label)
+    )
+    clear_button.pack(pady=5)
 
     items_frame = tk.Frame(skills_window)
     items_frame.pack(pady=10)
 
     if purchased_items:
-        tk.Label(skills_window, text="Cliquez sur un \u00e9l\u00e9ment pour personnaliser :", font=("Verdana", 12)).pack(pady=10)
+        tk.Label(skills_window, text="Cliquez sur un élément pour l'ajouter à la fusion :", font=("Verdana", 12)).pack(pady=10)
         for item in purchased_items:
             tk.Button(
                 items_frame, 
                 text=item, 
                 font=("Verdana", 10), 
-                command=lambda i=item: toggle_item_display(i, display_label)
+                command=lambda i=item: add_to_fusion(i, display_label)
             ).pack(side=tk.LEFT, padx=5)
     else:
-        tk.Label(skills_window, text="Aucun \u00e9l\u00e9ment achet\u00e9 pour le moment.", font=("Verdana", 12)).pack(pady=20)
+        tk.Label(skills_window, text="Aucun élément acheté pour le moment.", font=("Verdana", 12)).pack(pady=20)
 
     result_label = tk.Label(skills_window, text="", font=("Verdana", 12), wraplength=500)
+    result_label.pack(pady=10)
+
     fusion_button = tk.Button(
         skills_window, 
         text="Fusion", 
         font=("Verdana", 12), 
         command=lambda: handle_fusion(display_label, result_label, items_frame)
     )
-    fusion_button.pack(pady=20)
-    result_label.pack(pady=10)
+    fusion_button.pack(pady=10)
 
 def open_rpg_ui_window():
     rpg_window = tk.Toplevel(window)
-    rpg_window.title("RPG UI")
-    rpg_window.geometry("800x600")
-    tk.Label(rpg_window, text="Pr\u00e9parez-vous pour le combat !", font=("Verdana", 14)).pack(pady=20)
-    tk.Label(rpg_window, text="Ajoutez ici votre interface utilisateur RPG pour le combat.", font=("Verdana", 12), wraplength=600).pack(pady=10)
+    rpg_window.title("RPG Combat")
+    rpg_window.geometry("600x500")
+
+    tk.Label(rpg_window, text="Combat RPG", font=("Verdana", 16)).pack(pady=10)
+
+    combat_frame = tk.Frame(rpg_window)
+    combat_frame.pack(pady=10)
+
+    log_text = tk.Text(rpg_window, height=15, width=60, state=tk.DISABLED)
+    log_text.pack(pady=10)
+
+    fight_counter = {"count": 0}
+    player_hp = {"value": 100}
+    enemy_hp = {"value": 100}
+
+    def log_message(message):
+        log_text.config(state=tk.NORMAL)
+        log_text.insert(tk.END, message + "\n")
+        log_text.see(tk.END)
+        log_text.config(state=tk.DISABLED)
+
+    def start_next_fight():
+        if fight_counter["count"] >= 5:
+            log_message("🎉 Vous avez remporté les 5 combats !")
+            return
+        fight_counter["count"] += 1
+        player_hp["value"] = 100
+        enemy_hp["value"] = 50 + fight_counter["count"] * 10
+        update_health()
+        log_message(f"⚔️ Combat {fight_counter['count']} commencé !")
+
+    def update_health():
+        player_hp_label.config(text=f"Votre HP : {player_hp['value']}")
+        enemy_hp_label.config(text=f"Ennemi HP : {enemy_hp['value']}")
+
+    def attack():
+        if player_hp["value"] <= 0 or enemy_hp["value"] <= 0:
+            return
+
+        player_damage = random.randint(10, 25)
+        enemy_hp["value"] -= player_damage
+        log_message(f"💥 Vous infligez {player_damage} de dégâts à l'ennemi.")
+        if enemy_hp["value"] <= 0:
+            log_message(f"✅ Ennemi vaincu !")
+            start_next_fight()
+            return
+
+        enemy_damage = random.randint(5, 15)
+        player_hp["value"] -= enemy_damage
+        log_message(f"⚠️ L'ennemi vous inflige {enemy_damage} de dégâts.")
+        if player_hp["value"] <= 0:
+            log_message(f"💀 Vous avez été vaincu.")
+        
+        update_health()
+
+    player_hp_label = tk.Label(combat_frame, text=f"Votre HP : {player_hp['value']}", font=("Verdana", 12))
+    player_hp_label.pack(pady=5)
+
+    enemy_hp_label = tk.Label(combat_frame, text=f"Ennemi HP : {enemy_hp['value']}", font=("Verdana", 12))
+    enemy_hp_label.pack(pady=5)
+
+    attack_button = tk.Button(combat_frame, text="Attaquer", font=("Verdana", 12), command=attack)
+    attack_button.pack(pady=10)
+
+    start_next_fight()
 
 def open_military_window():
     ShopWindow("Entra\u00eeneur militaire", ["Coup simple : 100", "Coup puissant : 250", "Parade : 250"])

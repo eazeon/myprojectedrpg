@@ -14,262 +14,326 @@ fusion_recipes = {
         "damage": 25,
         "damage_type": "slashing",
         "element": "force",
-        "description": "Vous frappez avec votre hache !"
+        "description": "Vous frappez avec votre hache !",
+        "mana_cost": 0,
+        "fatigue_cost": 15
     },
     frozenset(["Coup simple", "Arc"]): {
         "result": "Tir simple",
         "damage": 20,
         "damage_type": "piercing",
         "element": "force",
-        "description": "Vous tirez avec votre arc !"
+        "description": "Vous tirez avec votre arc !",
+        "mana_cost": 0,
+        "fatigue_cost": 10
     },
     frozenset(["Coup simple", "Bouclier"]): {
         "result": "Coup de bouclier",
         "damage": 15,
         "damage_type": "contondant",
         "element": "force",
-        "description": "Vous frappez avec votre bouclier !"
+        "description": "Vous frappez avec votre bouclier !",
+        "mana_cost": 0,
+        "fatigue_cost": 10
     },
     frozenset(["Coup simple", "Épée courte"]): {
         "result": "Frappe à l'épée",
         "damage": 20,
         "damage_type": "slashing",
         "element": "force",
-        "description": "Vous frappez avec votre épée !"
+        "description": "Vous frappez avec votre épée !",
+        "mana_cost": 0,
+        "fatigue_cost": 10
     },
     frozenset(["Coup simple", "Épée longue"]): {
         "result": "Frappe à l'épée longue",
         "damage": 25,
         "damage_type": "slashing",
         "element": "force",
-        "description": "Vous frappez avec votre longue épée !"
+        "description": "Vous frappez avec votre longue épée !",
+        "mana_cost": 0,
+        "fatigue_cost": 15
     },
     frozenset(["Coup simple", "Dague"]): {
         "result": "Coup de dague",
         "damage": 15,
         "damage_type": "piercing",
         "element": "force",
-        "description": "Vous assénez un coup avec votre dague !"
+        "description": "Vous assénez un coup avec votre dague !",
+        "mana_cost": 0,
+        "fatigue_cost": 5
     },
     frozenset(["Coup puissant", "Épée courte"]): {
         "result": "Frappe lourde à l'épée",
         "damage": 45,
         "damage_type": "slashing",
         "element": "force",
-        "description": "Vous abattez lourdement votre épée !"
+        "description": "Vous abattez lourdement votre épée !",
+        "mana_cost": 0,
+        "fatigue_cost": 20
     },
     frozenset(["Coup puissant", "Épée longue"]): {
         "result": "Frappe lourde à l'épée longue",
         "damage": 50,
         "damage_type": "slashing",
         "element": "force",
-        "description": "Vous abattez lourdement votre épée longue !"
+        "description": "Vous abattez lourdement votre épée longue !",
+        "mana_cost": 0,
+        "fatigue_cost": 25
     },
     frozenset(["Coup puissant", "Dague"]): {
         "result": "Poignardage lourd",
         "damage": 25,
         "damage_type": "piercing",
         "element": "force",
-        "description": "Vous lacérez avec votre dague !"
+        "description": "Vous lacérez avec votre dague !",
+        "mana_cost": 0,
+        "fatigue_cost": 10
     },
     frozenset(["Coup puissant", "Hache de guerre"]): {
         "result": "Abattage de hache",
         "damage": 45,
         "damage_type": "slashing",
         "element": "force",
-        "description": "Vous abattez votre hache !"
+        "description": "Vous abattez votre hache !",
+        "mana_cost": 0,
+        "fatigue_cost": 25
     },
     frozenset(["Coup puissant", "Arc"]): {
         "result": "Tir violent",
         "damage": 40,
         "damage_type": "piercing",
         "element": "force",
-        "description": "Vous décochez une flèche à pleine puissance !"
+        "description": "Vous décochez une flèche à pleine puissance !",
+        "mana_cost": 0,
+        "fatigue_cost": 20
     },
     frozenset(["Coup puissant", "Bouclier"]): {
         "result": "Pillonage de bouclier",
         "damage": 25,
         "damage_type": "contondant",
         "element": "force",
-        "description": "Vous abbattez votre bouclier violemment !"
+        "description": "Vous abbattez votre bouclier violemment !",
+        "mana_cost": 0,
+        "fatigue_cost": 15
     },
     frozenset(["Parade", "Épée courte"]): {
         "result": "Parade à l'épée",
         "damage": 10,
         "damage_type": "slashing",
         "element": "force",
-        "description": "Vous prenez une posture défensive à l'épée!"
+        "description": "Vous prenez une posture défensive à l'épée!",
+        "mana_cost": 0,
+        "fatigue_cost": 10
     },
     frozenset(["Parade", "Épée longue"]): {
         "result": "Parade avec épée lourde",
         "damage": 15,
         "damage_type": "slashing",
         "element": "force",
-        "description": "
+        "description": "Vous prenez une posture défensive à l'épée longue!",
+        "mana_cost": 0,
+        "fatigue_cost": 10
     },
     frozenset(["Parade", "Dague"]): {
         "result": "Blocage à la dague",
         "damage": 5,
         "damage_type": "piercing",
-        "element": "force"
+        "element": "force",
+        "description": "Vous prenez une posture défensive à la dague !",
+        "mana_cost": 0,
+        "fatigue_cost": 10
     },
     frozenset(["Parade", "Hache de guerre"]): {
         "result": "Blocage à la hache",
         "damage": 15,
         "damage_type": "slashing",
-        "element": "force"
+        "element": "force",
+        "description": "Vous prenez une posture défensive à la hache !",
+        "mana_cost": 0,
+        "fatigue_cost": 10
     },
     frozenset(["Parade", "Arc"]): {
         "result": "Blocage avec l'arc",
         "damage": 10,
         "damage_type": "slashing",
-        "element": "force"
+        "element": "force",
+        "description": "Vous prenez une posture défensive à l'arc !",
+        "mana_cost": 0,
+        "fatigue_cost": 10
     },
     frozenset(["Parade", "Bouclier"]): {
         "result": "Blocage au bouclier",
         "damage": 5,
         "damage_type": "contondant",
-        "element": "force"
+        "element": "force",
+        "description": "Vous prenez une posture défensive au bouclier !",
+        "mana_cost": 0,
+        "fatigue_cost": 10
     },
     frozenset(["Coup simple", "Magie élémentaire Feu"]): {
         "result": "Boule de feu simple",
         "damage": 25,
         "damage_type": "magic",
-        "element": "fire"
+        "element": "fire",
+        "description": "Vous lancez une boule de feu simple!",
+        "mana_cost": 15,
+        "fatigue_cost": 0
     },
     frozenset(["Coup simple", "Magie élémentaire Air"]): {
         "result": "Bourrasque",
         "damage": 20,
         "damage_type": "magic",
-        "element": "wind"
+        "element": "wind",
+        "description": "Vous lancez une bourrasque !",
+        "mana_cost": 10,
+        "fatigue_cost": 0
     },
     frozenset(["Coup simple", "Magie élémentaire Eau"]): {
         "result": "Jet d'eau",
         "damage": 20,
         "damage_type": "magic",
-        "element": "water"
+        "element": "water",
+        "description": "Vous projetez un jet d'eau !",
+        "mana_cost": 10,
+        "fatigue_cost": 0
     },
     frozenset(["Coup simple", "Magie élémentaire Terre"]): {
         "result": "Frappe de terre",
         "damage": 20,
         "damage_type": "magic",
-        "element": "earth"
+        "element": "earth",
+        "description": "Vous projetez une motte de terre !",
+        "mana_cost": 10,
+        "fatigue_cost": 0
     },
     frozenset(["Coup simple", "Magie d'illusion"]): {
         "result": "Illusion simple",
         "damage": 0,
         "damage_type": "state",
-        "element": "illusion"
+        "element": "illusion",
+        "description": "Vous projetez une illusion simple !",
+        "mana_cost": 10,
+        "fatigue_cost": 0
     },
     frozenset(["Coup simple", "Magie psychique"]): {
         "result": "Décharge mentale",
         "damage": 10,
         "damage_type": "magic",
-        "element": "psychic"
+        "element": "psychic",
+        "description": "Vous projetez une décharge mentale !",
+        "mana_cost": 15,
+        "fatigue_cost": 0
     },
     frozenset(["Coup puissant", "Magie élémentaire Feu"]): {
         "result": "Colonne de flamme",
         "damage": 45,
         "damage_type": "magic",
-        "element": "fire"
+        "element": "fire",
+        "description": "Vous faites s'élever une colonne de flammes !",
+        "mana_cost": 25,
+        "fatigue_cost": 0
     },
     frozenset(["Coup puissant", "Magie élémentaire Air"]): {
         "result": "Tornade",
         "damage": 40,
         "damage_type": "magic",
-        "element": "wind"
+        "element": "wind",
+        "description": "Vous condensez une tornade !",
+        "mana_cost": 20,
+        "fatigue_cost": 0
     },
     frozenset(["Coup puissant", "Magie élémentaire Eau"]): {
         "result": "Tsunami",
         "damage": 40,
         "damage_type": "magic",
-        "element": "water"
+        "element": "water",
+        "description": "Vous déversez un tsunami !",
+        "mana_cost": 20,
+        "fatigue_cost": 0
     },
     frozenset(["Coup puissant", "Magie élémentaire Terre"]): {
         "result": "Séisme",
         "damage": 40,
         "damage_type": "magic",
-        "element": "earth"
+        "element": "earth",
+        "description": "Vous façonnez un séisme !",
+        "mana_cost": 20,
+        "fatigue_cost": 0
     },
     frozenset(["Coup puissant", "Magie d'illusion"]): {
         "result": "Image rémanente",
         "damage": 0,
         "damage_type": "state",
-        "element": "illusion"
+        "element": "illusion",
+        "description": "Vous créez une image rémanent de vous-même !",
+        "mana_cost": 20,
+        "fatigue_cost": 0
     },
     frozenset(["Coup puissant", "Magie psychique"]): {
         "result": "Emprise mentale",
         "damage": 20,
         "damage_type": "magic",
-        "element": "psychic"
+        "element": "psychic",
+        "description": "Vous prenez contrôle de votre ennemi !",
+        "mana_cost": 20,
+        "fatigue_cost": 0
     },
     frozenset(["Parade", "Magie élémentaire Feu"]): {
         "result": "Bouclier de feu",
         "damage": 15,
         "damage_type": "magic",
-        "element": "fire"
+        "element": "fire",
+        "description": "Vous prenez une posture défensive avec vos flammes !",
+        "mana_cost": 15,
+        "fatigue_cost": 5
     },
     frozenset(["Parade", "Magie élémentaire Air"]): {
         "result": "Bouclier d'air",
         "damage": 10,
         "damage_type": "magic",
-        "element": "wind"
+        "element": "wind",
+        "description": "Vous prenez une posture défensive avec vos bourrasques !",
+        "mana_cost": 10,
+        "fatigue_cost": 10
     },
     frozenset(["Parade", "Magie élémentaire Eau"]): {
         "result": "Bouclier d'eau",
         "damage": 10,
         "damage_type": "magic",
-        "element": "eau"
+        "element": "eau",
+        "description": "Vous prenez une posture défensive avec votre eau !",
+        "mana_cost": 10,
+        "fatigue_cost": 10
     },
     frozenset(["Parade", "Magie élémentaire Terre"]): {
         "result": "Bouclier de terre",
         "damage": 10,
         "damage_type": "magic",
-        "element": "earth"
+        "element": "earth",
+        "description": "Vous prenez une posture défensive renforcée par la terre !",
+        "mana_cost": 10,
+        "fatigue_cost": 10
     },
     frozenset(["Parade", "Magie d'illusion"]): {
         "result": "Illusion du bras",
         "damage": 0,
         "damage_type": "state",
-        "element": "psychic"
+        "element": "psychic",
+        "description": "Vous invoquez une image illusoire de votre bras armé !",
+        "mana_cost": 20,
+        "fatigue_cost": 5
     },
-    frozenset(["Parade", "Magie psychique"]): "Perturbation psychique",
-    frozenset(["Magie élémentaire Feu", "Magie élémentaire Feu"]): "Feu éternel",
-    frozenset(["Magie élémentaire Feu", "Magie élémentaire Air"]): "Tempête de feu",
-    frozenset(["Magie élémentaire Feu", "Magie élémentaire Eau"]): "Vapeur",
-    frozenset(["Magie élémentaire Feu", "Magie élémentaire Terre"]): "Coulée de lave",
-    frozenset(["Magie élémentaire Air", "Magie élémentaire Air"]): "Cyclone",
-    frozenset(["Magie élémentaire Air", "Magie élémentaire Eau"]): "Déluge",
-    frozenset(["Magie élémentaire Air", "Magie élémentaire Terre"]): "Poussière",
-    frozenset(["Magie élémentaire Eau", "Magie élémentaire Eau"]): "Tsunami",
-    frozenset(["Magie élémentaire Eau", "Magie élémentaire Terre"]): "Coulée de boue",
-    frozenset(["Magie élémentaire Terre", "Magie élémentaire Terre"]): "Contrôle sismique",
-    frozenset(["Magie élémentaire Feu", "Épée courte"]): "Épée à la lame enflammée",
-    frozenset(["Magie élémentaire Feu", "Épée longue"]): "Épée longue brûlante",
-    frozenset(["Magie élémentaire Feu", "Dague"]): "Dague embrasée",
-    frozenset(["Magie élémentaire Feu", "Hache de guerre"]): "Hache flamboyante",
-    frozenset(["Magie élémentaire Feu", "Arc"]): "Arc rougeoyant",
-    frozenset(["Magie élémentaire Feu", "Bouclier"]): "Bouclier imprégné de flammes",
-    frozenset(["Magie élémentaire Air", "Épée courte"]): "Épée entourée d'un zéphyr",
-    frozenset(["Magie élémentaire Air", "Épée longue"]): "Épée a deux main portée par le vent",
-    frozenset(["Magie élémentaire Air", "Dague"]): "Dague du vent",
-    frozenset(["Magie élémentaire Air", "Hache de guerre"]): "Hache des bourrasques",
-    frozenset(["Magie élémentaire Air", "Arc"]): "Arc des alizés",
-    frozenset(["Magie élémentaire Air", "Bouclier"]): "Bouclier porté par le vent",
-    frozenset(["Magie élémentaire Eau", "Épée courte"]): "Épée de la source",
-    frozenset(["Magie élémentaire Eau", "Épée longue"]): "Épée de la cascade",
-    frozenset(["Magie élémentaire Eau", "Dague"]): "Dague des profondeurs",
-    frozenset(["Magie élémentaire Eau", "Hache de guerre"]): "Hache des marées",
-    frozenset(["Magie élémentaire Eau", "Arc"]): "Arc des courants",
-    frozenset(["Magie élémentaire Eau", "Bouclier"]): "Bouclier alourdis par l'eau",
-    frozenset(["Magie élémentaire Terre", "Épée courte"]): "Épée des saillies rocheuses",
-    frozenset(["Magie élémentaire Terre", "Épée longue"]): "Épée des falaises",
-    frozenset(["Magie élémentaire Terre", "Dague"]): "Dague des désert",
-    frozenset(["Magie élémentaire Terre", "Hache de guerre"]): "Hache des fissures",
-    frozenset(["Magie élémentaire Terre", "Arc"]): "Arc des plaines",
-    frozenset(["Magie élémentaire Terre", "Bouclier"]): "Bouclier massif de terre",
-    frozenset(["Potion de soin", "Potion de soin"]): "Potion de soin supérieure",
-    frozenset(["Potion de soin", "Potion de poison"]): "Potion de poison auto soignant",
+    frozenset(["Potion de soin", "Potion de soin"]): {
+        "result": "Potion de soin supérieure",
+        "description": "Vous récupérez bien plus de PV !",
+        "consumable": True
+    },
+    frozenset(["Potion de soin", "Potion de poison"]): {
+        "result": "Potion de poison auto-soignant",
+        "description": "Vous récupérez bien plus de PV !",
+        "consumable": True
+    },
     frozenset(["Potion de soin", "Bombe l\u00e9g\u00e8re"]): "Bombe de soin",
     frozenset(["Potion de soin", "Bombe lourde"]): "Bombe puissante de soin",
     frozenset(["Potion de soin", "Bombe fumig\u00e8ne"]): "Bombe de fumée soignante",
@@ -292,7 +356,16 @@ fusion_recipes = {
 
 }
 
-itemshop_items = ["Potion de soin", "Potion de poison", "Bombe l\u00e9g\u00e8re", "Bombe lourde", "Bombe fumig\u00e8ne", "Filet"]
+
+enemy_types = [
+    {"name": "Gobelin", "hp": 80, "damage_range": (5, 15), "resistances": {}, "weight": 3},
+    {"name": "Salamandre", "hp": 100, "damage_range": (5, 15), "resistances": {"fire": 0.5}, "weight": 1},
+    {"name": "Ogre", "hp": 150, "damage_range": (10, 25), "resistances": {}, "weight": 2},
+    {"name": "Spectre", "hp": 70, "damage_range": (5, 10), "resistances": {"magic": 0.7}, "weight": 1},
+]
+
+
+itemshop_items = ["Potion de soin", "Potion de poison", "Potion de mana", "Potion de repos", "Bombe l\u00e9g\u00e8re", "Bombe lourde", "Bombe fumig\u00e8ne", "Filet"]
 
 # Function to update the main window with purchased items and fusion results
 def update_main_window():
@@ -405,10 +478,10 @@ def handle_fusion(display_label, result_label, items_frame):
 
             update_main_window()
             result_label.config(
-                text=f"Fusion réussie ! Vous avez créé : {result}\n"
-                     f"Statistiques :\n"
-                     f"Dégâts : {damage}\n"
-                     f"Élément : {element}",
+                text=f"Fusion réussie ! Vous avez créé : {result}\n",
+                     # f"Statistiques :\n"
+                     # f"Dégâts : {damage}\n"
+                     # f"Élément : {element}",
                 fg="green"
             )
     else:
@@ -479,19 +552,65 @@ def open_skills_creation_window():
 def open_rpg_ui_window():
     rpg_window = tk.Toplevel(window)
     rpg_window.title("RPG Combat")
-    rpg_window.geometry("600x500")
+    rpg_window.geometry("1200x900")
 
-    tk.Label(rpg_window, text="Combat RPG", font=("Verdana", 16)).pack(pady=10)
+    main_frame = tk.Frame(rpg_window)
+    main_frame.pack(fill=tk.BOTH, expand=True)
 
-    combat_frame = tk.Frame(rpg_window)
+    left_frame = tk.Frame(main_frame)
+    left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10)
+
+    right_frame = tk.Frame(main_frame)
+    right_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=10)
+
+    tk.Label(left_frame, text="Combat RPG", font=("Verdana", 16)).pack(pady=10)
+
+    combat_frame = tk.Frame(left_frame)
     combat_frame.pack(pady=10)
 
-    log_text = tk.Text(rpg_window, height=15, width=60, state=tk.DISABLED)
+    bars_frame = tk.Frame(left_frame)
+    bars_frame.pack(pady=10)
+
+    def create_bar(label_text, color):
+        container = tk.Frame(bars_frame)
+        container.pack(pady=5)
+        label = tk.Label(container, text=label_text, font=("Verdana", 10))
+        label.pack(side=tk.LEFT, padx=5)
+        canvas = tk.Canvas(container, width=200, height=20, bg="grey")
+        canvas.pack(side=tk.LEFT)
+        bar = canvas.create_rectangle(0, 0, 200, 20, fill=color)
+        value_label = tk.Label(container, text="100/100", font=("Verdana", 10))
+        value_label.pack(side=tk.LEFT, padx=5)
+        return canvas, bar, value_label
+
+
+    player_hp_canvas, player_hp_bar, player_hp_label = create_bar("Santé joueur", "green")
+    enemy_hp_canvas, enemy_hp_bar, enemy_hp_label = create_bar("Santé ennemi", "red")
+    mana_canvas, mana_bar, mana_label = create_bar("Mana joueur", "blue")
+    fatigue_canvas, fatigue_bar, fatigue_label = create_bar("Fatigue joueur", "orange")
+
+
+    log_text = tk.Text(left_frame, height=15, width=60, state=tk.DISABLED)
     log_text.pack(pady=10)
 
     fight_counter = {"count": 0}
     player_hp = {"value": 100}
+    player_mana = {"value": 100}
+    player_fatigue = {"value": 0}
     enemy_hp = {"value": 100}
+    current_enemy = {"name": "", "resistances": {}, "damage_range": (5, 15)}
+
+    def update_bars():
+        def set_bar(canvas, bar, label, value, max_value):
+            percent = max(min(value / max_value, 1), 0)
+            canvas.coords(bar, 0, 0, 200 * percent, 20)
+            label.config(text=f"{value}/{max_value}")
+        set_bar(player_hp_canvas, player_hp_bar, player_hp_label, player_hp["value"], 100)
+        set_bar(enemy_hp_canvas, enemy_hp_bar, enemy_hp_label, enemy_hp["value"], 100)
+        set_bar(mana_canvas, mana_bar, mana_label, player_mana["value"], 100)
+        set_bar(fatigue_canvas, fatigue_bar, fatigue_label, player_fatigue["value"], 100)
+        update_item_display()
+
 
     def log_message(message):
         log_text.config(state=tk.NORMAL)
@@ -499,48 +618,120 @@ def open_rpg_ui_window():
         log_text.see(tk.END)
         log_text.config(state=tk.DISABLED)
 
+    def enemy_attack():
+        if enemy_hp["value"] <= 0:
+            return
+        damage = random.randint(*current_enemy["damage_range"])
+        player_hp["value"] -= damage
+        log_message(f"⚠️ {current_enemy['name']} vous inflige {damage} de dégâts.")
+        if player_hp["value"] <= 0:
+            log_message(f"💀 Vous avez été vaincu.")
+
+    def use_skill(skill_data):
+        if player_mana["value"] < skill_data["mana_cost"] or player_fatigue["value"] + skill_data["fatigue_cost"] > 100:
+            messagebox.showwarning("Pas assez de ressources", "Pas assez de mana ou trop de fatigue.")
+            return
+
+        resistance = current_enemy["resistances"].get(skill_data["element"], 1.0)
+        actual_damage = int(skill_data["damage"] * resistance)
+
+        log_message(f"🌀 Vous utilisez : {skill_data['result']}")
+        log_message(f"{skill_data['description']}")
+        log_message(f"💥 Vous infligez {actual_damage} points de dégâts à {current_enemy['name']} !")
+
+        enemy_hp["value"] -= actual_damage
+        player_mana["value"] -= skill_data["mana_cost"]
+        player_fatigue["value"] += skill_data["fatigue_cost"]
+
+        if enemy_hp["value"] <= 0:
+            log_message(f"✅ {current_enemy['name']} vaincu !")
+            start_next_fight()
+        else:
+            enemy_attack()
+        update_bars()
+
+    item_frames = []
+
+    def update_item_display():
+        for frame in item_frames:
+            frame.destroy()
+        item_frames.clear()
+        for item in list(purchased_items):
+            if item in itemshop_items:
+                frame = tk.Frame(right_frame, bd=1, relief=tk.SOLID)
+                frame.pack(pady=3, fill=tk.X)
+                item_frames.append(frame)
+                tk.Label(frame, text=item, font=("Verdana", 10)).pack(anchor="w")
+                tk.Button(frame, text="Utiliser", font=("Verdana", 9), command=lambda i=item: use_item(i)).pack(pady=2)
+
+    def use_item(item):
+        if item not in purchased_items:
+            return
+        if item == "Potion de soin":
+            player_hp["value"] = min(100, player_hp["value"] + 25)
+            log_message("🧪 Vous utilisez Potion de soin et récupérez 25 PV.")
+        elif item == "Potion de soin supérieure":
+            player_hp["value"] = min(100, player_hp["value"] + 40)
+            log_message("🧪 Vous utilisez Potion de soin supérieure et récupérez 40 PV.")
+        elif item == "Potion de mana":
+            player_mana["value"] = min(100, player_mana["value"] + 50)
+            log_message("🧪 Vous utilisez Potion de mana et récupérez 50 de mana.")
+        elif item == "Potion de repos":
+            player_fatigue["value"] = max(0, player_fatigue["value"] - 50)
+            log_message("🧪 Vous utilisez Potion de repos et récupérez 50 de fatigue.")
+        else:
+            log_message(f"❓ {item} n'a pas encore d'effet implémenté.")
+        purchased_items.remove(item)
+        enemy_attack()
+        update_bars()
+
     def start_next_fight():
         if fight_counter["count"] >= 5:
             log_message("🎉 Vous avez remporté les 5 combats !")
             return
         fight_counter["count"] += 1
-        player_hp["value"] = 100
-        enemy_hp["value"] = 50 + fight_counter["count"] * 10
-        update_health()
-        log_message(f"⚔️ Combat {fight_counter['count']} commencé !")
 
-    def update_health():
-        player_hp_label.config(text=f"Votre HP : {player_hp['value']}")
-        enemy_hp_label.config(text=f"Ennemi HP : {enemy_hp['value']}")
+        enemy_type = random.choices(enemy_types, weights=[e['weight'] for e in enemy_types])[0]
+        current_enemy.update(enemy_type)
+
+        # player_hp["value"] = 100
+        # player_mana["value"] = 100
+        #player_fatigue["value"] = 0
+        enemy_hp["value"] = enemy_type["hp"]
+
+        update_bars()
+        log_message(f"⚔️ Combat {fight_counter['count']} commencé contre {current_enemy['name']} !")
 
     def attack():
         if player_hp["value"] <= 0 or enemy_hp["value"] <= 0:
             return
-
-        player_damage = random.randint(10, 25)
-        enemy_hp["value"] -= player_damage
-        log_message(f"💥 Vous infligez {player_damage} de dégâts à l'ennemi.")
+        damage = random.randint(10, 25)
+        enemy_hp["value"] -= damage
+        log_message(f"💥 Vous infligez {damage} de dégâts à {current_enemy['name']}.")
+        player_mana["value"] -= 10
+        player_fatigue["value"] += 15
         if enemy_hp["value"] <= 0:
-            log_message(f"✅ Ennemi vaincu !")
+            log_message(f"✅ {current_enemy['name']} vaincu !")
             start_next_fight()
-            return
+        else:
+            enemy_attack()
+        update_bars()
 
-        enemy_damage = random.randint(5, 15)
-        player_hp["value"] -= enemy_damage
-        log_message(f"⚠️ L'ennemi vous inflige {enemy_damage} de dégâts.")
-        if player_hp["value"] <= 0:
-            log_message(f"💀 Vous avez été vaincu.")
-        
-        update_health()
+    tk.Button(combat_frame, text="Attaque basique", font=("Verdana", 12), command=attack).pack(pady=5)
 
-    player_hp_label = tk.Label(combat_frame, text=f"Votre HP : {player_hp['value']}", font=("Verdana", 12))
-    player_hp_label.pack(pady=5)
+    tk.Label(right_frame, text="Compétences disponibles", font=("Verdana", 12, "bold")).pack(pady=5)
+    for fusion in fusion_results:
+        for key, val in fusion_recipes.items():
+            if isinstance(val, dict) and val.get("result") == fusion:
+                frame = tk.Frame(right_frame, bd=1, relief=tk.SOLID)
+                frame.pack(pady=3, fill=tk.X)
+                tk.Label(frame, text=fusion, font=("Verdana", 10, "bold")).pack(anchor="w")
+                tk.Label(frame, text=f"Dégâts: {val['damage']}", font=("Verdana", 9)).pack(anchor="w")
+                tk.Label(frame, text=f"Coût: {val['mana_cost']} mana, {val['fatigue_cost']} fatigue", font=("Verdana", 9)).pack(anchor="w")
+                tk.Button(frame, text="Utiliser", font=("Verdana", 9), command=lambda v=val: use_skill(v)).pack(pady=2)
 
-    enemy_hp_label = tk.Label(combat_frame, text=f"Ennemi HP : {enemy_hp['value']}", font=("Verdana", 12))
-    enemy_hp_label.pack(pady=5)
-
-    attack_button = tk.Button(combat_frame, text="Attaquer", font=("Verdana", 12), command=attack)
-    attack_button.pack(pady=10)
+    tk.Label(right_frame, text="Objets disponibles", font=("Verdana", 12, "bold")).pack(pady=5)
+    update_item_display()
 
     start_next_fight()
 
@@ -554,7 +745,7 @@ def open_milishop_window():
     ShopWindow("Marchand militaire", ["\u00c9p\u00e9e courte : 200", "\u00c9p\u00e9e longue : 350", "Dague : 200", "Hache de guerre : 250", "Arc : 250", "Bouclier : 350"])
 
 def open_itemshop_window():
-    ShopWindow("Marchand d'objets", ["Potion de soin : 50", "Potion de poison : 50", "Bombe l\u00e9g\u00e8re : 100", "Bombe lourde : 250", "Bombe fumig\u00e8ne : 100", "Filet : 100"])
+    ShopWindow("Marchand d'objets", ["Potion de soin : 50", "Potion de poison : 50", "Potion de mana : 100", "Potion de repos : 100", "Bombe l\u00e9g\u00e8re : 100", "Bombe lourde : 250", "Bombe fumig\u00e8ne : 100", "Filet : 100"])
 
 # Main window
 window = tk.Tk()

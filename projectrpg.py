@@ -7,7 +7,7 @@ import zipfile
 import sys
 import shutil
 
-CURRENT_VERSION = "0.0.8.1"
+CURRENT_VERSION = "0.0.8.2"
 
 def check_for_update():
     download_url = "https://github.com/FoZIkks/myprojectedrpg/releases/latest/download/projectrpg.exe"  # or .exe
@@ -68,7 +68,7 @@ fusion_results = []
 
 fusion_recipes = {
     frozenset(["Coup simple", "Hache de guerre"]): {
-        "result": "Frappe simple à la hache",
+        "result": "Frappe simple à la hachet",
         "damage": 25,
         "damage_type": "slashing",
         "element": "force",

@@ -68,7 +68,7 @@ fusion_results = []
 
 fusion_recipes = {
     frozenset(["Coup simple", "Hache de guerre"]): {
-        "result": "Frappe simple à la hachet",
+        "result": "Frapper simple à la hachet",
         "damage": 25,
         "damage_type": "slashing",
         "element": "force",

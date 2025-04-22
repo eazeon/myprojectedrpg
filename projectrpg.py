@@ -7,51 +7,52 @@ import zipfile
 import sys
 import shutil
 
-CURRENT_VERSION = "0.0.8.2"
+CURRENT_VERSION = "0.0.8"
 
 def check_for_update():
-    download_url = "https://github.com/FoZIkks/myprojectedrpg/releases/latest/download/projectrpg.exe"  # or .exe
+    version_url = "https://raw.githubusercontent.com/FoZIkks/myprojectedrpg/main/version.txt"
+    download_url = "https://github.com/FoZIkks/myprojectedrpg/releases/latest/download/projectrpg.exe"
 
     try:
-        response = requests.get(version_url)
-        latest_version = response.text.strip()
+        latest_version = requests.get(version_url).text.strip()
 
-        if latest_version > CURRENT_VERSION:
-            print(f"Nouvelle version disponible ({latest_version}) — mise à jour en cours...")
+        if latest_version != CURRENT_VERSION:
+            print(f"Nouvelle version disponible ({latest_version}) — mise à jour...")
             update_game(download_url)
         else:
             print("✅ Jeu à jour.")
     except Exception as e:
-        print(f"Erreur de vérification de mise à jour : {e}")
+        print(f"Erreur de mise à jour : {e}")
 
 
 def update_game(download_url):
     try:
-        # Download the new zip/exe
-        r = requests.get(download_url, stream=True)
-        with open("update.zip", "wb") as f:
-            for chunk in r.iter_content(chunk_size=8192):
+        # Download new EXE to a temp file
+        response = requests.get(download_url, stream=True)
+        with open("update_new.exe", "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
 
-        # Unzip and overwrite files
-        with zipfile.ZipFile("update.zip", "r") as zip_ref:
-            zip_ref.extractall("update_temp")
+        # Save current executable name
+        current_exe = sys.executable
 
-        for item in os.listdir("update_temp"):
-            s = os.path.join("update_temp", item)
-            d = os.path.join(".", item)
-            if os.path.isdir(s):
-                shutil.copytree(s, d, dirs_exist_ok=True)
-            else:
-                shutil.copy2(s, d)
+        # Create an updater script that will replace the running EXE
+        with open("run_update.bat", "w") as f:
+            f.write(f"""
+@echo off
+timeout /t 2 > NUL
+copy /Y update_new.exe "{current_exe}"
+start "" "{current_exe}"
+del update_new.exe
+del run_update.bat
+""")
 
-        shutil.rmtree("update_temp")
-        os.remove("update.zip")
-        print("Mise à jour terminée. Redémarrage...")
-        restart_game()
+        print("🔁 Mise à jour téléchargée. Redémarrage...")
+        os.startfile("run_update.bat")
+        sys.exit()
 
     except Exception as e:
-        print(f"Erreur pendant la mise à jour: {e}")
+        print(f"Erreur pendant la mise à jour : {e}")
 
 def restart_game():
     python = sys.executable
@@ -68,7 +69,7 @@ fusion_results = []
 
 fusion_recipes = {
     frozenset(["Coup simple", "Hache de guerre"]): {
-        "result": "Frapper simple à la hachet",
+        "result": "Frapper simple à la hache",
         "damage": 25,
         "damage_type": "slashing",
         "element": "force",
@@ -424,7 +425,6 @@ enemy_types = [
     {"name": "Salamandre", "hp": 100, "damage_range": (5, 15), "resistances": {"fire": 0.5},"weaknesses": {"water": 1.5}, "weight": 1},
     {"name": "Ogre", "hp": 150, "damage_range": (10, 25), "resistances": {}, "weaknesses": {"magic": 1.25},"weight": 2},
     {"name": "Spectre", "hp": 70, "damage_range": (5, 10), "resistances": {"magic": 0.7}, "weaknesses": {"contondant": 2.0}, "weight": 1},
-    {"name": "Mark Zuckerberg", "hp": 100, "damage_range": (15, 20), "resistances": {"contondant": 0.7}, "weaknesses": {"magic": 2.0}, "weight": 1},
 ]
 
 

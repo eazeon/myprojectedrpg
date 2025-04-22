@@ -336,13 +336,41 @@ fusion_recipes = {
         "description": "Une potion qui vous infige des dégâts mais vous soigne..?",
         "consumable": True
     },
-    frozenset(["Potion de soin", "Bombe l\u00e9g\u00e8re"]): "Bombe de soin",
-    frozenset(["Potion de soin", "Bombe lourde"]): "Bombe puissante de soin",
-    frozenset(["Potion de soin", "Bombe fumig\u00e8ne"]): "Bombe de fumée soignante",
-    frozenset(["Potion de soin", "Filet"]): "Filet soignant",
-    frozenset(["Potion de poison", "Potion de poison"]): "Potion de poison puissante",
-    frozenset(["Potion de poison", "Bombe l\u00e9g\u00e8re"]): "Bombe de poison",
-    frozenset(["Potion de poison", "Bombe lourde"]): "Bombe puissante de poison",
+    frozenset(["Potion de soin", "Bombe l\u00e9g\u00e8re"]) :{
+        "result": "Bombe de soin",
+        "description": "Une bombe qui vous infige des dégâts par le souffle de l'explosion mais vous soigne..?",
+        "consumable": True
+    },
+    frozenset(["Potion de soin", "Bombe lourde"]): {
+        "result": "Bombe de soin puissante",
+        "description": "Une grosse bombe qui vous infige des dégâts par le souffle de l'explosion mais vous soigne..?",
+        "consumable": True
+    },
+    frozenset(["Potion de soin", "Bombe fumig\u00e8ne"]): {
+        "result": "Bombe de fumée de soin",
+        "description": "Une bombe qui libère une fumée qui vous soigne et empêche les attaques de vous ou des ennemis.",
+        "consumable": True
+    },
+    frozenset(["Potion de soin", "Filet"]): {
+        "result": "Filet de soin",
+        "description": "Un filet qui ligote votre ennemi mais le soigne...?",
+        "consumable": True
+    },
+    frozenset(["Potion de poison", "Potion de poison"]): {
+        "result": "Potion de poison fort",
+        "description": "Une potion qui provoque un empoisonnement fort.",
+        "consumable": True
+    },
+    frozenset(["Potion de poison", "Bombe l\u00e9g\u00e8re"]): {
+        "result": "Bombe de poison",
+        "description": "Une bombe qui empoisonne votre ennemi",
+        "consumable": True
+    },
+    frozenset(["Potion de poison", "Bombe lourde"]): {
+        "result": "Potion de bombe puissante",
+        "description": "Une bombe puissante qui provoque un empoisonnement.",
+        "consumable": True
+    },
     frozenset(["Potion de poison", "Bombe fumig\u00e8ne"]): "Bombe de fumée empoisonnante",
     frozenset(["Potion de poison", "Filet"]): "Filet empoisonné",
     frozenset(["Bombe l\u00e9g\u00e8re", "Bombe l\u00e9g\u00e8re"]): "Bombe lourde",
@@ -366,8 +394,8 @@ fusion_recipes = {
 enemy_types = [
     {"name": "Gobelin", "hp": 80, "damage_range": (5, 15), "resistances": {}, "weaknesses": {"piercing": 1.5}, "weight": 3},
     {"name": "Salamandre", "hp": 100, "damage_range": (5, 15), "resistances": {"fire": 0.5},"weaknesses": {"water": 1.5}, "weight": 1},
-    {"name": "Ogre", "hp": 150, "damage_range": (10, 25), "resistances": {}, "weaknesses": {"magic": 1.25},"weight": 2},
-    {"name": "Spectre", "hp": 70, "damage_range": (5, 10), "resistances": {"magic": 0.7}, "weaknesses": {"contondant": 2.0}, "weight": 1},
+    {"name": "Ogre", "hp": 150, "damage_range": (10, 25), "resistances": {"contondant": 2.0}, "weaknesses": {"magic": 1.25},"weight": 2},
+    {"name": "Spectre", "hp": 70, "damage_range": (5, 10), "resistances": {"contondant": 0.7}, "weaknesses": {"magic": 2.0}, "weight": 1},
 ]
 
 

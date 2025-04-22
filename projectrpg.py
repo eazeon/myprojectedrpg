@@ -7,59 +7,8 @@ import zipfile
 import sys
 import shutil
 
-CURRENT_VERSION = "0.0.9"
+CURRENT_VERSION = "0.0.7"
 
-def check_for_update():
-    version_url = "https://raw.githubusercontent.com/FoZIkks/myprojectedrpg/main/version.txt"
-    download_url = "https://github.com/FoZIkks/myprojectedrpg/releases/latest/download/projectrpg.exe"
-
-    try:
-        latest_version = requests.get(version_url).text.strip()
-
-        if latest_version != CURRENT_VERSION:
-            print(f"Nouvelle version disponible ({latest_version}) — mise à jour...")
-            update_game(download_url)
-        else:
-            print("✅ Jeu à jour.")
-    except Exception as e:
-        print(f"Erreur de mise à jour : {e}")
-
-
-def update_game(download_url):
-    try:
-        # Download new EXE to a temp file
-        response = requests.get(download_url, stream=True)
-        with open("update_new.exe", "wb") as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
-
-        # Save current executable name
-        current_exe = sys.executable
-
-        # Create an updater script that will replace the running EXE
-        with open("run_update.bat", "w") as f:
-            f.write(f"""
-@echo off
-timeout /t 2 > NUL
-copy /Y update_new.exe "{current_exe}"
-start "" "{current_exe}"
-del update_new.exe
-del run_update.bat
-""")
-
-        print("🔁 Mise à jour téléchargée. Redémarrage...")
-        os.startfile("run_update.bat")
-        sys.exit()
-
-    except Exception as e:
-        print(f"Erreur pendant la mise à jour : {e}")
-
-def restart_game():
-    python = sys.executable
-    os.execl(python, python, *sys.argv)
-
-# Check des maj
-check_for_update()
 
 # Global variables
 money = 1000
@@ -69,7 +18,7 @@ fusion_results = []
 
 fusion_recipes = {
     frozenset(["Coup simple", "Hache de guerre"]): {
-        "result": "Frapper simple à la hache",
+        "result": "Frappe simple à la hache",
         "damage": 25,
         "damage_type": "slashing",
         "element": "force",

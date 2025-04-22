@@ -1,14 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
 import random
-import requests
-import os
-import zipfile
-import sys
-import shutil
 
-CURRENT_VERSION = "0.0.7"
-
+CURRENT_VERSION = "0.0.8"
 
 # Global variables
 money = 1000

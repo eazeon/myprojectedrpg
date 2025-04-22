@@ -7,7 +7,7 @@ import zipfile
 import sys
 import shutil
 
-CURRENT_VERSION = "0.0.8"
+CURRENT_VERSION = "0.0.9"
 
 def check_for_update():
     version_url = "https://raw.githubusercontent.com/FoZIkks/myprojectedrpg/main/version.txt"

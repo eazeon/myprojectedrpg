@@ -1,6 +1,65 @@
 import tkinter as tk
 from tkinter import messagebox
 import random
+import requests
+import os
+import zipfile
+import sys
+import shutil
+
+CURRENT_VERSION = "0.0.8"
+
+def check_for_update():
+    version_url = "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/version.txt"
+    download_url = "https://github.com/YOUR_USERNAME/YOUR_REPO/releases/latest/download/game.zip"  # or .exe
+
+    try:
+        response = requests.get(version_url)
+        latest_version = response.text.strip()
+
+        if latest_version > CURRENT_VERSION:
+            print(f"Nouvelle version disponible ({latest_version}) — mise à jour en cours...")
+            update_game(download_url)
+        else:
+            print("✅ Jeu à jour.")
+    except Exception as e:
+        print(f"Erreur de vérification de mise à jour : {e}")
+
+
+def update_game(download_url):
+    try:
+        # Download the new zip/exe
+        r = requests.get(download_url, stream=True)
+        with open("update.zip", "wb") as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                f.write(chunk)
+
+        # Unzip and overwrite files
+        with zipfile.ZipFile("update.zip", "r") as zip_ref:
+            zip_ref.extractall("update_temp")
+
+        for item in os.listdir("update_temp"):
+            s = os.path.join("update_temp", item)
+            d = os.path.join(".", item)
+            if os.path.isdir(s):
+                shutil.copytree(s, d, dirs_exist_ok=True)
+            else:
+                shutil.copy2(s, d)
+
+        shutil.rmtree("update_temp")
+        os.remove("update.zip")
+        print("Mise à jour terminée. Redémarrage...")
+        restart_game()
+
+    except Exception as e:
+        print(f"Erreur pendant la mise à jour: {e}")
+
+def restart_game():
+    python = sys.executable
+    os.execl(python, python, *sys.argv)
+
+# Check des maj
+check_for_update()
 
 # Global variables
 money = 1000
@@ -326,12 +385,12 @@ fusion_recipes = {
     },
     frozenset(["Potion de soin", "Potion de soin"]): {
         "result": "Potion de soin supérieure",
-        "description": "Vous récupérez bien plus de PV !",
+        "description": "Une potion a la régénération de PV bien plus importante.",
         "consumable": True
     },
     frozenset(["Potion de soin", "Potion de poison"]): {
         "result": "Potion de poison auto-soignant",
-        "description": "Vous récupérez bien plus de PV !",
+        "description": "Une potion qui vous infige des dégâts mais vous soigne..?",
         "consumable": True
     },
     frozenset(["Potion de soin", "Bombe l\u00e9g\u00e8re"]): "Bombe de soin",
@@ -353,15 +412,19 @@ fusion_recipes = {
     frozenset(["Bombe fumig\u00e8ne", "Bombe fumig\u00e8ne"]): "Bombe lourde de fumée",
     frozenset(["Bombe fumig\u00e8ne", "Filet"]): "Filet enfumé",
     frozenset(["Filet", "Filet"]): "Filet tentaculaire",
+    frozenset(["Potion de mana", "Potion de repos"]): {
+        "result": "Potion de récupération",
+        "consumable": True
+    }
 
 }
 
 
 enemy_types = [
-    {"name": "Gobelin", "hp": 80, "damage_range": (5, 15), "resistances": {}, "weight": 3},
-    {"name": "Salamandre", "hp": 100, "damage_range": (5, 15), "resistances": {"fire": 0.5}, "weight": 1},
-    {"name": "Ogre", "hp": 150, "damage_range": (10, 25), "resistances": {}, "weight": 2},
-    {"name": "Spectre", "hp": 70, "damage_range": (5, 10), "resistances": {"magic": 0.7}, "weight": 1},
+    {"name": "Gobelin", "hp": 80, "damage_range": (5, 15), "resistances": {}, "weaknesses": {"piercing": 1.5}, "weight": 3},
+    {"name": "Salamandre", "hp": 100, "damage_range": (5, 15), "resistances": {"fire": 0.5},"weaknesses": {"water": 1.5}, "weight": 1},
+    {"name": "Ogre", "hp": 150, "damage_range": (10, 25), "resistances": {}, "weaknesses": {"magic": 1.25},"weight": 2},
+    {"name": "Spectre", "hp": 70, "damage_range": (5, 10), "resistances": {"magic": 0.7}, "weaknesses": {"contondant": 2.0}, "weight": 1},
 ]
 
 
@@ -447,47 +510,51 @@ def handle_fusion(display_label, result_label, items_frame):
     global fusion_results
     selected_set = frozenset(selected_items)
     if selected_set in fusion_recipes:
-        recipe = fusion_recipes[selected_set]
+         recipe = fusion_recipes[selected_set]
+    
+    # If the recipe is a dictionary with a "result", it's a skill fusion
+    if isinstance(recipe, dict) and "result" in recipe:
         result = recipe["result"]
-        damage = recipe["damage"]
-        damage_type = recipe["damage_type"]
-        element = recipe["element"]
+        fusion_results.append(result)
 
-        if result in fusion_results:
-            result_label.config(
-                text="Échec de la fusion : Cette fusion a déjà été réalisée.", fg="red"
-            )
-        else:
-            fusion_results.append(result)
+        # Remove used items if they are from the item shop
+        for item in selected_items:
+            if item in itemshop_items and item in purchased_items:
+                purchased_items.remove(item)
 
-            # Remove only one instance of each item used in fusion (if it's a shop item)
-            for item in selected_items:
-                if item in itemshop_items and item in purchased_items:
-                    purchased_items.remove(item)
+        # Update UI
+        for widget in items_frame.winfo_children():
+            widget.destroy()
+        for item in purchased_items:
+            tk.Button(
+                items_frame,
+                text=item,
+                font=("Verdana", 10),
+                command=lambda i=item: toggle_item_display(i, display_label),
+            ).pack(side=tk.LEFT, padx=5)
 
-            # Update the items display
-            for widget in items_frame.winfo_children():
-                widget.destroy()
-            for item in purchased_items:
-                tk.Button(
-                    items_frame,
-                    text=item,
-                    font=("Verdana", 10),
-                    command=lambda i=item: toggle_item_display(i, display_label),
-                ).pack(side=tk.LEFT, padx=5)
+        update_main_window()
+        result_label.config(
+            text=f"Fusion réussie ! Vous avez créé : {result}",
+            fg="green"
+        )
 
-            update_main_window()
-            result_label.config(
-                text=f"Fusion réussie ! Vous avez créé : {result}\n",
-                     # f"Statistiques :\n"
-                     # f"Dégâts : {damage}\n"
-                     # f"Élément : {element}",
-                fg="green"
-            )
+    # If it's a string, it's a simple item result
+    elif isinstance(recipe, str):
+        result = recipe
+        fusion_results.append(result)
+        for item in selected_items:
+            if item in itemshop_items and item in purchased_items:
+                purchased_items.remove(item)
+        update_main_window()
+        result_label.config(
+            text=f"Fusion réussie ! Vous avez créé : {result}",
+            fg="green"
+        )
     else:
         result_label.config(
-            text="Échec de la fusion : La combinaison actuelle ne donne aucun résultat.",
-            fg="red",
+            text="Échec de la fusion : format de recette inattendu.",
+            fg="red"
         )
 
     # Clear the selected items
@@ -571,6 +638,64 @@ def open_rpg_ui_window():
     bars_frame = tk.Frame(left_frame)
     bars_frame.pack(pady=10)
 
+    def show_floating_text(parent, text, color="red", duration=800):
+        floating = tk.Label(parent, text=text, fg=color, font=("Verdana", 14, "bold"))
+        floating.place(x=100, y=100)  # Adjust as needed
+        dy = -2
+        steps = duration // 50
+
+        def animate(step=0):
+            if step < steps:
+                floating.place_configure(y=100 + dy * step)
+                floating.after(50, animate, step + 1)
+            else:
+                floating.destroy()
+        animate()
+
+    def update_skills_display():
+    # Clear previous widgets
+        for widget in right_frame.winfo_children():
+            widget.destroy()
+
+        tk.Label(right_frame, text="Compétences disponibles", font=("Verdana", 12, "bold")).pack(pady=5)
+
+        for fusion in fusion_results:
+            for key, val in fusion_recipes.items():
+                if isinstance(val, dict) and val.get("result") == fusion:
+                    if val.get("consumable", False):
+                        # It's an item, not a skill — skip here
+                        break
+                    # Otherwise it's a skill
+                    frame = tk.Frame(right_frame, bd=1, relief=tk.SOLID)
+                    frame.pack(pady=3, fill=tk.X)
+                    tk.Label(frame, text=fusion, font=("Verdana", 10, "bold")).pack(anchor="w")
+                    tk.Label(frame, text=f"Dégâts: {val.get('damage', 0)}", font=("Verdana", 9)).pack(anchor="w")
+                    tk.Label(frame, text=f"Coût: {val.get('mana_cost', 0)} mana, {val.get('fatigue_cost', 0)} fatigue", font=("Verdana", 9)).pack(anchor="w")
+                    tk.Button(frame, text="Utiliser", font=("Verdana", 9), command=lambda v=val: use_skill(v)).pack(pady=2)
+
+        tk.Label(right_frame, text="Objets disponibles", font=("Verdana", 12, "bold")).pack(pady=5)
+        update_item_display()
+
+
+    def start_next_fight():
+        if fight_counter["count"] >= 5:
+            log_message("🎉 Vous avez remporté les 5 combats !")
+            return
+        fight_counter["count"] += 1
+
+        enemy_type = random.choices(enemy_types, weights=[e['weight'] for e in enemy_types])[0]
+        current_enemy.update(enemy_type)
+
+        # player_hp["value"] = 100
+        # player_mana["value"] = 100
+        #player_fatigue["value"] = 0
+        enemy_hp["value"] = enemy_type["hp"]
+
+        update_bars()
+        log_message(f"⚔️ Combat {fight_counter['count']} commencé contre {current_enemy['name']} !")
+        update_skills_display()
+
+
     def create_bar(label_text, color):
         container = tk.Frame(bars_frame)
         container.pack(pady=5)
@@ -612,11 +737,22 @@ def open_rpg_ui_window():
         update_item_display()
 
 
-    def log_message(message):
+    def log_message(message, flash=False):
         log_text.config(state=tk.NORMAL)
         log_text.insert(tk.END, message + "\n")
         log_text.see(tk.END)
         log_text.config(state=tk.DISABLED)
+
+        if flash:
+            def flash_color(count=0):
+                color = "yellow" if count % 2 == 0 else "white"
+                log_text.config(bg=color)
+                if count < 4:
+                    log_text.after(150, flash_color, count + 1)
+                else:
+                    log_text.config(bg="white")
+            flash_color()
+
 
     def enemy_attack():
         if enemy_hp["value"] <= 0:
@@ -624,6 +760,7 @@ def open_rpg_ui_window():
         damage = random.randint(*current_enemy["damage_range"])
         player_hp["value"] -= damage
         log_message(f"⚠️ {current_enemy['name']} vous inflige {damage} de dégâts.")
+        show_floating_text(rpg_window, damage, "red")
         if player_hp["value"] <= 0:
             log_message(f"💀 Vous avez été vaincu.")
 
@@ -632,12 +769,29 @@ def open_rpg_ui_window():
             messagebox.showwarning("Pas assez de ressources", "Pas assez de mana ou trop de fatigue.")
             return
 
+        base_damage = skill_data["damage"]
         resistance = current_enemy["resistances"].get(skill_data["element"], 1.0)
-        actual_damage = int(skill_data["damage"] * resistance)
+        weakness_bonus = 1.0
 
-        log_message(f"🌀 Vous utilisez : {skill_data['result']}")
-        log_message(f"{skill_data['description']}")
-        log_message(f"💥 Vous infligez {actual_damage} points de dégâts à {current_enemy['name']} !")
+        # Check for element or damage type weaknesses
+        if skill_data["element"] in current_enemy.get("weaknesses", {}):
+            weakness_bonus *= current_enemy["weaknesses"][skill_data["element"]]
+            log_message (f"{current_enemy['name']} semble faible face à l'attaque!")
+        if skill_data["damage_type"] in current_enemy.get("weaknesses", {}):
+            weakness_bonus *= current_enemy["weaknesses"][skill_data["damage_type"]]
+
+        actual_damage = int(base_damage * resistance * weakness_bonus)
+
+
+        log_message (f"🌀 Vous utilisez : {skill_data['result']}")
+        log_message (f"{skill_data['description']}")
+        log_message (f"💥 Vous infligez {actual_damage} points de dégâts à {current_enemy['name']} !")
+        if skill_data["element"] in current_enemy.get("weaknesses", {}):
+            log_message (f"{current_enemy['name']} semble faible face à cette attaque !")
+        if skill_data["damage_type"] in current_enemy.get("weaknesses", {}):
+            log_message (f"{current_enemy['name']} semble peu sensible à cette attaque !")
+        show_floating_text(rpg_window, actual_damage, "red")
+
 
         enemy_hp["value"] -= actual_damage
         player_mana["value"] -= skill_data["mana_cost"]
@@ -647,7 +801,8 @@ def open_rpg_ui_window():
             log_message(f"✅ {current_enemy['name']} vaincu !")
             start_next_fight()
         else:
-            enemy_attack()
+            log_message("⏳ L'ennemi se prépare à attaquer...")
+            rpg_window.after(2000, enemy_attack)
         update_bars()
 
     item_frames = []
@@ -656,8 +811,18 @@ def open_rpg_ui_window():
         for frame in item_frames:
             frame.destroy()
         item_frames.clear()
-        for item in list(purchased_items):
-            if item in itemshop_items:
+
+        # Merge purchased_items with item-like fusion results
+        all_items = list(purchased_items)
+
+        for fusion in fusion_results:
+            for key, val in fusion_recipes.items():
+                if isinstance(val, dict) and val.get("result") == fusion and val.get("consumable", False):
+                    if fusion not in all_items:
+                        all_items.append(fusion)
+
+        for item in all_items:
+            if item in itemshop_items or item in fusion_results:
                 frame = tk.Frame(right_frame, bd=1, relief=tk.SOLID)
                 frame.pack(pady=3, fill=tk.X)
                 item_frames.append(frame)
@@ -665,42 +830,42 @@ def open_rpg_ui_window():
                 tk.Button(frame, text="Utiliser", font=("Verdana", 9), command=lambda i=item: use_item(i)).pack(pady=2)
 
     def use_item(item):
-        if item not in purchased_items:
+        # First: check if it's a consumable fusion
+        is_consumable_fusion = False
+        for recipe in fusion_recipes.values():
+            if isinstance(recipe, dict) and recipe.get("result") == item and recipe.get("consumable"):
+                is_consumable_fusion = True
+                break
+
+        # Handle regular shop items
+        if item in purchased_items:
+            purchased_items.remove(item)
+        elif not is_consumable_fusion:
+            log_message(f"❌ Vous ne possédez pas {item}.")
             return
+
+        # Handle item effects
         if item == "Potion de soin":
             player_hp["value"] = min(100, player_hp["value"] + 25)
-            log_message("🧪 Vous utilisez Potion de soin et récupérez 25 PV.")
+            log_message("🧪 Vous utilisez une potion de soin et récupérez 25 PV.")
         elif item == "Potion de soin supérieure":
-            player_hp["value"] = min(100, player_hp["value"] + 40)
-            log_message("🧪 Vous utilisez Potion de soin supérieure et récupérez 40 PV.")
+            player_hp["value"] = min(100, player_hp["value"] + 50)
+            log_message("🧪 Vous utilisez une potion de soin supérieure et récupérez 50 PV.")
         elif item == "Potion de mana":
             player_mana["value"] = min(100, player_mana["value"] + 50)
-            log_message("🧪 Vous utilisez Potion de mana et récupérez 50 de mana.")
+            log_message("🧪 Vous utilisez une potion de mana et récupérez 50 de mana.")
         elif item == "Potion de repos":
             player_fatigue["value"] = max(0, player_fatigue["value"] - 50)
-            log_message("🧪 Vous utilisez Potion de repos et récupérez 50 de fatigue.")
+            log_message("🧪 Vous utilisez une potion de repos et récupérez 50 de fatigue.")
+        elif item == "Potion de récupération":
+            player_fatigue["value"] = max(0, player_fatigue["value"] - 50)
+            player_mana["value"] = min(100, player_mana["value"] + 50)
+            log_message("🧪 Vous utilisez une potion de récupération : +50 mana, -50 fatigue.")
         else:
             log_message(f"❓ {item} n'a pas encore d'effet implémenté.")
-        purchased_items.remove(item)
+
         enemy_attack()
         update_bars()
-
-    def start_next_fight():
-        if fight_counter["count"] >= 5:
-            log_message("🎉 Vous avez remporté les 5 combats !")
-            return
-        fight_counter["count"] += 1
-
-        enemy_type = random.choices(enemy_types, weights=[e['weight'] for e in enemy_types])[0]
-        current_enemy.update(enemy_type)
-
-        # player_hp["value"] = 100
-        # player_mana["value"] = 100
-        #player_fatigue["value"] = 0
-        enemy_hp["value"] = enemy_type["hp"]
-
-        update_bars()
-        log_message(f"⚔️ Combat {fight_counter['count']} commencé contre {current_enemy['name']} !")
 
     def attack():
         if player_hp["value"] <= 0 or enemy_hp["value"] <= 0:
@@ -714,21 +879,13 @@ def open_rpg_ui_window():
             log_message(f"✅ {current_enemy['name']} vaincu !")
             start_next_fight()
         else:
-            enemy_attack()
+            log_message("⏳ L'ennemi se prépare à attaquer...")
+            rpg_window.after(2000, enemy_attack)
         update_bars()
 
     tk.Button(combat_frame, text="Attaque basique", font=("Verdana", 12), command=attack).pack(pady=5)
 
-    tk.Label(right_frame, text="Compétences disponibles", font=("Verdana", 12, "bold")).pack(pady=5)
-    for fusion in fusion_results:
-        for key, val in fusion_recipes.items():
-            if isinstance(val, dict) and val.get("result") == fusion:
-                frame = tk.Frame(right_frame, bd=1, relief=tk.SOLID)
-                frame.pack(pady=3, fill=tk.X)
-                tk.Label(frame, text=fusion, font=("Verdana", 10, "bold")).pack(anchor="w")
-                tk.Label(frame, text=f"Dégâts: {val['damage']}", font=("Verdana", 9)).pack(anchor="w")
-                tk.Label(frame, text=f"Coût: {val['mana_cost']} mana, {val['fatigue_cost']} fatigue", font=("Verdana", 9)).pack(anchor="w")
-                tk.Button(frame, text="Utiliser", font=("Verdana", 9), command=lambda v=val: use_skill(v)).pack(pady=2)
+    update_skills_display()
 
     tk.Label(right_frame, text="Objets disponibles", font=("Verdana", 12, "bold")).pack(pady=5)
     update_item_display()

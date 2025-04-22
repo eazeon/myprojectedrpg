@@ -7,11 +7,10 @@ import zipfile
 import sys
 import shutil
 
-CURRENT_VERSION = "0.0.8"
+CURRENT_VERSION = "0.0.8.1"
 
 def check_for_update():
-    version_url = "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/version.txt"
-    download_url = "https://github.com/YOUR_USERNAME/YOUR_REPO/releases/latest/download/game.zip"  # or .exe
+    download_url = "https://github.com/FoZIkks/myprojectedrpg/releases/latest/download/projectrpg.exe"  # or .exe
 
     try:
         response = requests.get(version_url)
@@ -425,6 +424,7 @@ enemy_types = [
     {"name": "Salamandre", "hp": 100, "damage_range": (5, 15), "resistances": {"fire": 0.5},"weaknesses": {"water": 1.5}, "weight": 1},
     {"name": "Ogre", "hp": 150, "damage_range": (10, 25), "resistances": {}, "weaknesses": {"magic": 1.25},"weight": 2},
     {"name": "Spectre", "hp": 70, "damage_range": (5, 10), "resistances": {"magic": 0.7}, "weaknesses": {"contondant": 2.0}, "weight": 1},
+    {"name": "Mark Zuckerberg", "hp": 100, "damage_range": (15, 20), "resistances": {"contondant": 0.7}, "weaknesses": {"magic": 2.0}, "weight": 1},
 ]
 
 

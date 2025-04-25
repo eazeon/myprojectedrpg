@@ -13,6 +13,19 @@ enemy_status_effects = {}
 from fusion_recipes_lists import fusion_recipes
 from enemy_types_lists import enemy_types
 
+player_xp = {
+    "global": 0,
+    "force": 0,
+    "magic": 0
+}
+
+player_stats = {
+    "max_hp": 100,
+    "max_mana": 100,
+    "max_fatigue": 100,
+    "force_bonus": 1.0,
+    "magic_bonus": 1.0
+}
 
 itemshop_items = ["Potion de soin", "Potion de poison", "Potion de mana", "Potion de repos", "Bombe l\u00e9g\u00e8re", "Bombe lourde", "Bombe fumig\u00e8ne", "Filet"]
 
@@ -37,13 +50,26 @@ def open_inventaire_window():
     inventaire_window.title("Inventaire")
     inventaire_window.geometry("400x300")
 
-    tk.Label(inventaire_window, text="Fusions R\u00e9alis\u00e9es", font=("Verdana", 14)).pack(pady=10)
+    inventaire_window.configure(bg="#fff9ec")
+    tk.Label(inventaire_window, text="📖 Fusions Réalisées", font=("Verdana", 14, "bold"), bg="#fff9ec").pack(pady=10)
+
+    scroll_canvas = tk.Canvas(inventaire_window, bg="#fff9ec", highlightthickness=0)
+    scroll_frame = tk.Frame(scroll_canvas, bg="#fff9ec")
+    scrollbar = tk.Scrollbar(inventaire_window, orient="vertical", command=scroll_canvas.yview)
+    scroll_canvas.configure(yscrollcommand=scrollbar.set)
+
+    scrollbar.pack(side="right", fill="y")
+    scroll_canvas.pack(side="left", fill="both", expand=True)
+    scroll_canvas.create_window((0, 0), window=scroll_frame, anchor="nw")
+
+    scroll_frame.bind("<Configure>", lambda e: scroll_canvas.configure(scrollregion=scroll_canvas.bbox("all")))
 
     if fusion_results:
         for fusion in fusion_results:
-            tk.Label(inventaire_window, text=fusion, font=("Verdana", 12)).pack(anchor="w", padx=20, pady=5)
+            tk.Label(scroll_frame, text=f"• {fusion}", font=("Verdana", 12), bg="#fff9ec", anchor="w").pack(fill="x", padx=20, pady=4)
     else:
-        tk.Label(inventaire_window, text="Aucune fusion r\u00e9alis\u00e9e", font=("Verdana", 12)).pack(pady=20)
+        tk.Label(scroll_frame, text="Aucune fusion réalisée", font=("Verdana", 12), bg="#fff9ec").pack(pady=20)
+
 
 class ShopWindow:
     def __init__(self, title, button_texts):
@@ -52,22 +78,29 @@ class ShopWindow:
         self.window.geometry("600x500")
 
         # Display money
-        self.money_label = tk.Label(self.window, text=f"Argent: {money} deullars", font=("Verdana", 12))
+        self.window.configure(bg="#f9f5ec")
+
+        self.money_label = tk.Label(self.window, text=f"💰 Argent : {money} deullars", font=("Verdana", 12), bg="#f9f5ec")
         self.money_label.pack(pady=10)
 
-        # Title label
-        tk.Label(self.window, text=f"Bienvenue chez le {title}", font=("Verdana", 14)).pack(pady=20)
+        tk.Label(self.window, text=f"🏪 Bienvenue chez le {title}", font=("Verdana", 14, "bold"), bg="#f9f5ec").pack(pady=10)
 
-        # Buttons
+        frame = tk.Frame(self.window, bg="#f9f5ec")
+        frame.pack(pady=5)
+
         for text in button_texts:
             item_name, cost = text.split(" : ")
             cost = int(cost)
-            tk.Button(
-                self.window, 
-                text=text, 
-                font=("Verdana", 10), 
+            btn = tk.Button(
+                frame,
+                text=f"{item_name} - {cost} 💰",
+                font=("Verdana", 10),
+                width=40,
+                bg="#f0e6d6",
                 command=lambda t=item_name, c=cost: self.handle_purchase(t, c)
-            ).pack(pady=5)
+            )
+            btn.pack(pady=4)
+
 
     def handle_purchase(self, item_name, cost):
         global money
@@ -211,13 +244,73 @@ def clear_selection(display_label):
     selected_items.clear()
     display_label.config(text="Aucun élément sélectionné")
 
+def open_upgrade_window():
+    upgrade_window = tk.Toplevel(window)
+    upgrade_window.title("📈 Améliorations")
+    upgrade_window.geometry("420x500")
+    upgrade_window.configure(bg="#f1f1f1")
+
+    tk.Label(upgrade_window, text="📈 Améliorations de personnage", font=("Verdana", 14, "bold"), bg="#f1f1f1").pack(pady=10)
+
+    xp_frame = tk.Frame(upgrade_window, bg="#f1f1f1")
+    xp_frame.pack(pady=5)
+
+    def refresh_labels():
+        for widget in xp_frame.winfo_children():
+            widget.destroy()
+
+        tk.Label(xp_frame, text=f"✨ XP global : {player_xp['global']}", font=("Verdana", 11), bg="#f1f1f1").pack(anchor="w", padx=20)
+        tk.Label(xp_frame, text=f"💪 XP force : {player_xp['force']}", font=("Verdana", 11), bg="#f1f1f1").pack(anchor="w", padx=20)
+        tk.Label(xp_frame, text=f"🔮 XP magie : {player_xp['magic']}", font=("Verdana", 11), bg="#f1f1f1").pack(anchor="w", padx=20)
+
+    refresh_labels()
+
+    def upgrade(stat, xp_type, cost, amount, display_name):
+        if player_xp[xp_type] >= cost:
+            player_xp[xp_type] -= cost
+            player_stats[stat] += amount
+            messagebox.showinfo("Succès", f"{display_name} augmenté de {amount} !")
+            refresh_labels()
+        else:
+            messagebox.showwarning("Erreur", "Pas assez d'expérience !")
+
+    tk.Label(upgrade_window, text="🛠️ Choisissez une amélioration :", font=("Verdana", 12, "bold"), bg="#f1f1f1").pack(pady=10)
+
+    upgrades = [
+        ("❤️ Santé Max +10 (XP Global)", "max_hp", "global", 100, 10),
+        ("💪 Bonus Force +0.1 (XP Force)", "force_bonus", "force", 100, 0.1),
+        ("⚡ Fatigue Max +10 (XP Force)", "max_fatigue", "force", 100, 10),
+        ("🔮 Bonus Magie +0.1 (XP Magic)", "magic_bonus", "magic", 100, 0.1),
+        ("🌀 Mana Max +10 (XP Magic)", "max_mana", "magic", 100, 10)
+    ]
+
+    for label, stat, xp_type, cost, amount in upgrades:
+        tk.Button(
+            upgrade_window,
+            text=f"{label} ({cost} XP)",
+            font=("Verdana", 10),
+            width=35,
+            bg="#dcecf5",
+            command=lambda s=stat, x=xp_type, c=cost, a=amount, l=label: upgrade(s, x, c, a, l)
+        ).pack(pady=5)
+
+    tk.Button(
+        upgrade_window,
+        text="Fermer",
+        font=("Verdana", 10),
+        bg="lightgray",
+        command=upgrade_window.destroy
+    ).pack(pady=15)
+
+
 # Fenêtre de création de compétences
 def open_skills_creation_window():
     skills_window = tk.Toplevel()
     skills_window.title("Création des compétences")
     skills_window.geometry("900x600")
 
-    tk.Label(skills_window, text="Création des compétences", font=("Verdana", 14)).pack(pady=20)
+    skills_window.configure(bg="#eef7ff")
+    tk.Label(skills_window, text="🔮 Création des compétences", font=("Verdana", 14, "bold"), bg="#eef7ff").pack(pady=20)
 
     display_label = tk.Label(skills_window, text="Aucun élément sélectionné", font=("Verdana", 12), wraplength=500)
     display_label.pack(pady=10)
@@ -323,7 +416,7 @@ def open_rpg_ui_window():
     right_frame = tk.Frame(main_frame)
     right_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=10)
 
-    tk.Label(left_frame, text="Combat RPG", font=("Verdana", 16)).pack(pady=10)
+    tk.Label(left_frame, text="⚔️ Combat RPG", font=("Verdana", 16, "bold")).pack(pady=10)
 
     combat_frame = tk.Frame(left_frame)
     combat_frame.pack(pady=10)
@@ -394,6 +487,10 @@ def open_rpg_ui_window():
             log_message("🎉 Vous avez remporté les 5 combats !")
             return
         fight_counter["count"] += 1
+        xp_gain = 50  # or scale with enemy difficulty
+        player_xp["global"] += xp_gain
+        log_message(f"🏆 Vous gagnez {xp_gain} points d'expérience globale !")
+
 
         enemy_type = random.choices(enemy_types, weights=[e['weight'] for e in enemy_types])[0]
         current_enemy.update(enemy_type)
@@ -487,6 +584,14 @@ def open_rpg_ui_window():
         modifier = 1.0
         element = skill_data["element"]
         damage_type = skill_data["damage_type"]
+        # Specific XP gain
+        if skill_data["damage_type"] == "magic":
+            player_xp["magic"] += 10
+            log_message("✨ Vous gagnez 10 XP magique.")
+        elif skill_data["damage_type"] == "slashing" or skill_data["damage_type"] == "piercing" or skill_data["damage_type"] == "contondant":
+            player_xp["force"] += 10
+            log_message("💪 Vous gagnez 10 XP de force.")
+
 
         # Applique les résistances ou faiblesses (élément et type) — priorité à la résistance
         if element in current_enemy.get("resistances", {}):
@@ -636,17 +741,21 @@ window = tk.Tk()
 window.title("Project RPG")
 window.geometry("800x700")
 
-main_label = tk.Label(window, text="Cr\u00e9ation des comp\u00e9tences", font=("Verdana", 18))
-main_label.pack(pady=20)
+main_label = tk.Label(window, text="🧙 Project RPG - Menu Principal", font=("Verdana", 18, "bold"))
+main_label.pack(pady=15)
 
-main_money_label = tk.Label(window, text=f"Argent : {money} deullars", font=("Verdana", 12))
-main_money_label.pack(pady=10)
+main_money_label = tk.Label(window, text=f"💰 Argent : {money} deullars", font=("Verdana", 12))
+main_money_label.pack(pady=5)
 
-purchases_label = tk.Label(window, text="Items achet\u00e9s : ", font=("Verdana", 12), wraplength=600, justify="center")
-purchases_label.pack(pady=10)
+purchases_label = tk.Label(window, text="📦 Items achetés :", font=("Verdana", 12, "bold"), wraplength=600, justify="left")
+purchases_label.pack(pady=5)
 
-fusions_label = tk.Label(window, text="Fusions r\u00e9alis\u00e9es : Aucun", font=("Verdana", 12), wraplength=600, justify="center")
-fusions_label.pack(pady=10)
+fusions_label = tk.Label(window, text="🧪 Fusions réalisées : Aucun", font=("Verdana", 12, "bold"), wraplength=600, justify="left")
+fusions_label.pack(pady=5)
+
+# Add a visual separator
+separator = tk.Frame(window, height=2, bd=1, relief=tk.SUNKEN, bg="gray")
+separator.pack(fill="x", padx=10, pady=10)
 
 # Add buttons
 military_button = tk.Button(window, text="Entra\u00eeneur militaire", font=("Verdana", 12), command=open_military_window)
@@ -672,5 +781,8 @@ reset_button.pack(pady=10)
 
 inventaire_button = tk.Button(window, text="Inventaire", font=("Verdana", 12), command=open_inventaire_window)
 inventaire_button.pack(pady=10)
+
+upgrade_button = tk.Button(window, text="📈 Améliorer les stats", font=("Verdana", 12), command=open_upgrade_window)
+upgrade_button.pack(pady=5)
 
 window.mainloop()

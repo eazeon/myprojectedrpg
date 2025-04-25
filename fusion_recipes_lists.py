@@ -1,3 +1,18 @@
+# Fichier de listes des recettes disponibles à la fusion
+# Template pour fusion de compétences
+"""
+    frozenset(["1erIngrédient", "2emeIngrédient"]): {
+        "result": "Nom",
+        "damage": 0,
+        "damage_type": "TypeDeDegat", # Type de dégat existant : contondant / slashing / piercing / magic
+        "element": "ElementDeDegat", # Les attaques physiques infligent des dégats de 'force', les attaques magiques des dégats de type 'magic'
+        "description": "VotreDescription",
+        "mana_cost": 0, # Tant qu'il y a de la magie impliquée utilisation du mana
+        "fatigue_cost": 0 # Tant qu'il y a des coups physiques impliqués utilisation de fatigue
+    },
+"""
+
+
 fusion_recipes = {
     frozenset(["Coup simple", "Hache de guerre"]): {
         "result": "Frappe simple à la hache",

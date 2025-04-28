@@ -244,65 +244,6 @@ def clear_selection(display_label):
     selected_items.clear()
     display_label.config(text="Aucun élément sélectionné")
 
-def open_upgrade_window():
-    upgrade_window = tk.Toplevel(window)
-    upgrade_window.title("📈 Améliorations")
-    upgrade_window.geometry("420x500")
-    upgrade_window.configure(bg="#f1f1f1")
-
-    tk.Label(upgrade_window, text="📈 Améliorations de personnage", font=("Verdana", 14, "bold"), bg="#f1f1f1").pack(pady=10)
-
-    xp_frame = tk.Frame(upgrade_window, bg="#f1f1f1")
-    xp_frame.pack(pady=5)
-
-    def refresh_labels():
-        for widget in xp_frame.winfo_children():
-            widget.destroy()
-
-        tk.Label(xp_frame, text=f"✨ XP global : {player_xp['global']}", font=("Verdana", 11), bg="#f1f1f1").pack(anchor="w", padx=20)
-        tk.Label(xp_frame, text=f"💪 XP force : {player_xp['force']}", font=("Verdana", 11), bg="#f1f1f1").pack(anchor="w", padx=20)
-        tk.Label(xp_frame, text=f"🔮 XP magie : {player_xp['magic']}", font=("Verdana", 11), bg="#f1f1f1").pack(anchor="w", padx=20)
-
-    refresh_labels()
-
-    def upgrade(stat, xp_type, cost, amount, display_name):
-        if player_xp[xp_type] >= cost:
-            player_xp[xp_type] -= cost
-            player_stats[stat] += amount
-            messagebox.showinfo("Succès", f"{display_name} augmenté de {amount} !")
-            refresh_labels()
-        else:
-            messagebox.showwarning("Erreur", "Pas assez d'expérience !")
-
-    tk.Label(upgrade_window, text="🛠️ Choisissez une amélioration :", font=("Verdana", 12, "bold"), bg="#f1f1f1").pack(pady=10)
-
-    upgrades = [
-        ("❤️ Santé Max +10 (XP Global)", "max_hp", "global", 100, 10),
-        ("💪 Bonus Force +0.1 (XP Force)", "force_bonus", "force", 100, 0.1),
-        ("⚡ Fatigue Max +10 (XP Force)", "max_fatigue", "force", 100, 10),
-        ("🔮 Bonus Magie +0.1 (XP Magic)", "magic_bonus", "magic", 100, 0.1),
-        ("🌀 Mana Max +10 (XP Magic)", "max_mana", "magic", 100, 10)
-    ]
-
-    for label, stat, xp_type, cost, amount in upgrades:
-        tk.Button(
-            upgrade_window,
-            text=f"{label} ({cost} XP)",
-            font=("Verdana", 10),
-            width=35,
-            bg="#dcecf5",
-            command=lambda s=stat, x=xp_type, c=cost, a=amount, l=label: upgrade(s, x, c, a, l)
-        ).pack(pady=5)
-
-    tk.Button(
-        upgrade_window,
-        text="Fermer",
-        font=("Verdana", 10),
-        bg="lightgray",
-        command=upgrade_window.destroy
-    ).pack(pady=15)
-
-
 # Fenêtre de création de compétences
 def open_skills_creation_window():
     skills_window = tk.Toplevel()
@@ -724,6 +665,66 @@ def open_rpg_ui_window():
 
     start_next_fight()
 
+def open_upgrade_window():
+    upgrade_window = tk.Toplevel(window)
+    upgrade_window.title("📈 Améliorations")
+    upgrade_window.geometry("420x500")
+    upgrade_window.configure(bg="#f1f1f1")
+
+    tk.Label(upgrade_window, text="📈 Améliorations de personnage", font=("Verdana", 14, "bold"), bg="#f1f1f1").pack(pady=10)
+
+    xp_frame = tk.Frame(upgrade_window, bg="#f1f1f1")
+    xp_frame.pack(pady=5)
+
+    def refresh_labels():
+        for widget in xp_frame.winfo_children():
+            widget.destroy()
+
+        tk.Label(xp_frame, text=f"✨ XP global : {player_xp['global']}", font=("Verdana", 11), bg="#f1f1f1").pack(anchor="w", padx=20)
+        tk.Label(xp_frame, text=f"💪 XP force : {player_xp['force']}", font=("Verdana", 11), bg="#f1f1f1").pack(anchor="w", padx=20)
+        tk.Label(xp_frame, text=f"🔮 XP magie : {player_xp['magic']}", font=("Verdana", 11), bg="#f1f1f1").pack(anchor="w", padx=20)
+
+    refresh_labels()
+
+    def upgrade(stat, xp_type, cost, amount, display_name):
+        if player_xp[xp_type] >= cost:
+            player_xp[xp_type] -= cost
+            player_stats[stat] += amount
+
+            messagebox.showinfo("Succès", f"{display_name} augmenté de {amount} !")
+            refresh_labels()
+        else:
+            messagebox.showwarning("Erreur", "Pas assez d'expérience !")
+
+    tk.Label(upgrade_window, text="🛠️ Choisissez une amélioration :", font=("Verdana", 12, "bold"), bg="#f1f1f1").pack(pady=10)
+
+    upgrades = [
+        ("❤️ Santé Max +10 (XP Global)", "max_hp", "global", 100, 10),
+        ("💪 Bonus Force +0.1 (XP Force)", "force_bonus", "force", 100, 0.1),
+        ("⚡ Fatigue Max +10 (XP Force)", "max_fatigue", "force", 100, 10),
+        ("🔮 Bonus Magie +0.1 (XP Magie)", "magic_bonus", "magic", 100, 0.1),
+        ("🌀 Mana Max +10 (XP Magie)", "max_mana", "magic", 100, 10)
+    ]
+
+    for label, stat, xp_type, cost, amount in upgrades:
+        tk.Button(
+            upgrade_window,
+            text=f"{label} ({cost} XP)",
+            font=("Verdana", 10),
+            width=35,
+            bg="#dcecf5",
+            command=lambda s=stat, x=xp_type, c=cost, a=amount, l=label: upgrade(s, x, c, a, l)
+        ).pack(pady=5)
+
+    tk.Button(
+        upgrade_window,
+        text="Fermer",
+        font=("Verdana", 10),
+        bg="lightgray",
+        command=upgrade_window.destroy
+    ).pack(pady=15)
+
+
 def open_military_window():
     ShopWindow("Entra\u00eeneur militaire", ["Coup simple : 100", "Coup puissant : 250", "Parade : 250"])
 
@@ -741,7 +742,7 @@ window = tk.Tk()
 window.title("Project RPG")
 window.geometry("800x700")
 
-main_label = tk.Label(window, text="🧙 Project RPG - Menu Principal", font=("Verdana", 18, "bold"))
+main_label = tk.Label(window, text=" Project RPG - Menu Principal", font=("Verdana", 18, "bold"))
 main_label.pack(pady=15)
 
 main_money_label = tk.Label(window, text=f"💰 Argent : {money} deullars", font=("Verdana", 12))

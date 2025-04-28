@@ -5,7 +5,7 @@
         "result": "Nom",
         "damage": 0,
         "damage_type": "TypeDeDegat", # Type de dégat existant : contondant / slashing / piercing / magic
-        "element": "ElementDeDegat", # Les attaques physiques infligent des dégats de 'force', les attaques magiques des dégats de type 'magic'
+        "element": "ElementDeDegat", # Les attaques physiques infligent des dégats de 'force', les attaques magiques des dégats de type fire / wind / water / earth / illusion / psychic
         "description": "VotreDescription",
         "mana_cost": 0, # Tant qu'il y a de la magie impliquée utilisation du mana
         "fatigue_cost": 0 # Tant qu'il y a des coups physiques impliqués utilisation de fatigue

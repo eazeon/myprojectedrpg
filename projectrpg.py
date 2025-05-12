@@ -427,10 +427,13 @@ def open_rpg_ui_window():
         if fight_counter["count"] >= 5:
             log_message("🎉 Vous avez remporté les 5 combats !")
             return
-        fight_counter["count"] += 1
-        xp_gain = 50  # or scale with enemy difficulty
-        player_xp["global"] += xp_gain
-        log_message(f"🏆 Vous gagnez {xp_gain} points d'expérience globale !")
+        if fight_counter["count"] == 0: # axell<3
+            return
+        else:
+            fight_counter["count"] += 1
+            xp_gain = 50  # or scale with enemy difficulty
+            player_xp["global"] += xp_gain
+            log_message(f"🏆 Vous gagnez {xp_gain} points d'expérience globale !")
 
 
         enemy_type = random.choices(enemy_types, weights=[e['weight'] for e in enemy_types])[0]

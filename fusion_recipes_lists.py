@@ -385,7 +385,11 @@ fusion_recipes = {
     frozenset(["Bombe lourde", "Filet"]): "Filet explosif",
     frozenset(["Bombe fumig\u00e8ne", "Bombe fumig\u00e8ne"]): "Bombe lourde de fumée",
     frozenset(["Bombe fumig\u00e8ne", "Filet"]): "Filet enfumé",
-    frozenset(["Filet", "Filet"]): "Filet tentaculaire",
+    frozenset(["Filet", "Filet"]): {
+        "result": "Filet tentaculaire",
+        "description": "Un gigantesque filet ",
+        "consumable": True
+    },
     frozenset(["Potion de mana", "Potion de repos"]): {
         "result": "Potion de récupération",
         "consumable": True

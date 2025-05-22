@@ -331,9 +331,29 @@ fusion_recipes = {
     },
     frozenset(["Potion de soin", "Potion de soin"]): {
         "result": "Potion de soin supérieure",
-        "description": "Une potion a la régénération de PV bien plus importante.",
-        "consumable": True
+        "description": "Une potion à la régénération de PV bien plus importante.",
+        "consumable": True,
+        "effect": {
+            "type": "heal",
+            "target": "player",
+            "value": 50
+        }
     },
+    frozenset(["Potion de poison", "Filet"]): {
+        "result": "Filet empoisonné",
+        "description": "Un filet qui empoisonne et immobilise l'ennemi.",
+        "consumable": True,
+        "effect": {
+            "type": "poison_stun",
+            "target": "enemy",
+            "duration": 3,
+            "damage_per_turn": 3,
+            "stun_duration": 1,
+            "element": "poison"
+        }
+    }
+    
+"""
     frozenset(["Potion de soin", "Potion de poison"]): {
         "result": "Potion de poison auto-soignant",
         "description": "Une potion qui vous infige des dégâts mais vous soigne..?",
@@ -404,4 +424,5 @@ fusion_recipes = {
         "description": "Un arc alimenté par le vent.",
         "enchanted": True
     }
+"""
 }

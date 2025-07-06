@@ -105,9 +105,13 @@ class ShopWindow:
     def handle_purchase(self, item_name, cost):
         global money
         # Check if the item has already been purchased and is not from the itemshop
-        if item_name in purchased_items and item_name not in itemshop_items:
-            messagebox.showwarning("Achat refusé", f"Vous avez déjà acheté {item_name}.")
-            return
+        if item_name in purchased_items:
+            if item_name not in itemshop_items:
+                messagebox.showwarning("Achat refusé\", f\"Vous avez déjà acheté {item_name}.")
+                return
+            elif itemshop_items.count(item_name) == 1:
+                messagebox.showwarning("Achat refusé\", f\"{item_name} est déjà dans votre inventaire.")
+                return
 
         if money >= cost:
             money -= cost
@@ -415,7 +419,7 @@ def open_rpg_ui_window():
         for effect, data in enemy_status_effects.items():
             enemy_hp["value"] -= data["damage_per_turn"]
             log_message(f"🔥 {current_enemy['name']} subit {data['damage_per_turn']} dégâts de {effect}.")
-            show_floating_text(window, data["damage_per_turn"], "orange")
+            show_floating_text(rpg_window, data["damage_per_turn"], "orange")
             data["duration"] -= 1
             if data["duration"] <= 0:
                 to_remove.append(effect)
@@ -790,3 +794,4 @@ upgrade_button = tk.Button(window, text="📈 Améliorer les stats", font=("Verd
 upgrade_button.pack(pady=5)
 
 window.mainloop()
+

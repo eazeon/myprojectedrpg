@@ -351,9 +351,7 @@ fusion_recipes = {
             "stun_duration": 1,
             "element": "poison"
         }
-    }
-    
-"""
+    },
     frozenset(["Potion de soin", "Potion de poison"]): {
         "result": "Potion de poison auto-soignant",
         "description": "Une potion qui vous infige des dégâts mais vous soigne..?",
@@ -424,5 +422,4 @@ fusion_recipes = {
         "description": "Un arc alimenté par le vent.",
         "enchanted": True
     }
-"""
 }

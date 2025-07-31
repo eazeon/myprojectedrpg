@@ -4,7 +4,7 @@ import random
 import os
 import csv
 
-CURRENT_VERSION = "0.1.1"
+CURRENT_VERSION = "0.1.2"
 VERSION_NAME = "Pre-Alpha"
 
 SAVE_FILE = "save.csv"
@@ -107,8 +107,6 @@ itemshop_items = ["Potion de soin", "Potion de poison", "Potion de mana", "Potio
 
 # Function to update the main window with purchased items and fusion results
 def update_main_window():
-    purchases_label.config(text=f"Items achet\u00e9s : {', '.join(purchased_items)}")
-    fusions_label.config(text=f"Fusions r\u00e9alis\u00e9es : {', '.join(fusion_results)}" if fusion_results else "Fusions r\u00e9alis\u00e9es : Aucun")
     main_money_label.config(text=f"Argent : {money} deullars")
 
 # Reset the game state
@@ -137,11 +135,10 @@ def inn_rest():
     player_fatigue = {"value": 0}
 
     
-# Open the inventaire window
 def open_inventaire_window():
     inventaire_window = tk.Toplevel(window)
     inventaire_window.title("Inventaire")
-    inventaire_window.geometry("400x300")
+    inventaire_window.geometry("900x800")
 
     inventaire_window.configure(bg="#fff9ec")
     tk.Label(inventaire_window, text="📖 Fusions Réalisées", font=("Verdana", 14, "bold"), bg="#fff9ec").pack(pady=10)
@@ -159,9 +156,56 @@ def open_inventaire_window():
 
     if fusion_results:
         for fusion in fusion_results:
-            tk.Label(scroll_frame, text=f"• {fusion}", font=("Verdana", 12), bg="#fff9ec", anchor="w").pack(fill="x", padx=20, pady=4)
+            # Recherche des infos pour cette fusion
+            fusion_info = None
+            for key, val in fusion_recipes.items():
+                if isinstance(val, dict) and val.get("result") == fusion:
+                    fusion_info = val
+                    break
+
+            # Affichage du nom de la fusion
+            tk.Label(
+                scroll_frame,
+                text=f"• {fusion}",
+                font=("Verdana", 12, "bold"),
+                bg="#fff9ec",
+                anchor="w"
+            ).pack(fill="x", padx=20, pady=(8, 0))
+
+            # Si c'est une compétence (pas un objet consommable ou enchanté)
+            if fusion_info and not fusion_info.get("consumable", False) and not fusion_info.get("enchanted", False):
+                desc = fusion_info.get("description", "Pas de description")
+                mana_cost = fusion_info.get("mana_cost", 0)
+                fatigue_cost = fusion_info.get("fatigue_cost", 0)
+
+                # Affiche la description
+                tk.Label(
+                    scroll_frame,
+                    text=f"   {desc}",
+                    font=("Verdana", 10),
+                    bg="#fff9ec",
+                    anchor="w",
+                    wraplength=350,
+                    justify="left"
+                ).pack(fill="x", padx=40)
+
+                # Affiche les coûts
+                tk.Label(
+                    scroll_frame,
+                    text=f"   Coût : {mana_cost} mana, {fatigue_cost} fatigue",
+                    font=("Verdana", 9, "italic"),
+                    bg="#fff9ec",
+                    anchor="w"
+                ).pack(fill="x", padx=40)
+
     else:
-        tk.Label(scroll_frame, text="Aucune fusion réalisée", font=("Verdana", 12), bg="#fff9ec").pack(pady=20)
+        tk.Label(
+            scroll_frame,
+            text="Aucune fusion réalisée",
+            font=("Verdana", 12),
+            bg="#fff9ec"
+        ).pack(pady=20)
+
 
 
 class ShopWindow:
@@ -431,7 +475,7 @@ def open_skills_creation_window():
     fusion_button = tk.Button(
         bottom_frame,
         text="Fusion",
-        font=("Verdana", 12),
+        font=("Verdana", 16, "bold"),
         command=lambda: handle_fusion(display_label, result_label, scrollable_frame)
     )
     fusion_button.pack(pady=5)
@@ -898,12 +942,6 @@ player_name_label.place(relx=1.0, x=-10, y=10, anchor="ne")
 # Labels d'information
 main_money_label = tk.Label(window, text=f"💰 Argent : {money} deullars", font=("Verdana", 12))
 main_money_label.pack(pady=5)
-
-purchases_label = tk.Label(window, text="📦 Items achetés :", font=("Verdana", 12, "bold"), wraplength=600, justify="left")
-purchases_label.pack(pady=5)
-
-fusions_label = tk.Label(window, text="🧪 Fusions réalisées : Aucun", font=("Verdana", 12, "bold"), wraplength=600, justify="left")
-fusions_label.pack(pady=5)
 
 # Conteneur pour organiser les catégories
 buttons_frame = tk.Frame(window)

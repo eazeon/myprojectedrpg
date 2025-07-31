@@ -968,6 +968,7 @@ tk.Label(frame_top_right, text="Joueur", font=("Verdana", 14, "bold")).pack()
 tk.Button(frame_top_right, text="Fusion !", font=("Verdana", 12), command=open_skills_creation_window).pack(pady=5)
 tk.Button(frame_top_right, text="Inventaire", font=("Verdana", 12), command=open_inventaire_window).pack(pady=5)
 tk.Button(frame_top_right, text="Améliorer les stats", font=("Verdana", 12), command=open_upgrade_window).pack(pady=5)
+tk.Button(frame_top_right, text="Se reposer à l'auberge", font=("Verdana", 12), command=inn_rest).pack(pady=5)
 
 # ----- Catégorie 3 : Combat et Quêtes -----
 frame_bottom_left = styled_frame(buttons_frame, "#f3f7e9")

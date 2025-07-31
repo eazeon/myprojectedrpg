@@ -228,7 +228,14 @@ fusion_recipes = {
         "element": "psychic",
         "description": "Vous projetez une décharge mentale !",
         "mana_cost": 15,
-        "fatigue_cost": 0
+        "fatigue_cost": 0,
+        "effect": {
+            "type": "poison",
+            "target": "enemy",
+            "duration": 3,
+            "damage_per_turn": 4,
+            "element": "psychic"
+        }
     },
     frozenset(["Coup puissant", "Magie élémentaire Feu"]): {
         "result": "Colonne de flamme",
@@ -273,7 +280,12 @@ fusion_recipes = {
         "element": "illusion",
         "description": "Vous créez une image rémanent de vous-même !",
         "mana_cost": 20,
-        "fatigue_cost": 0
+        "fatigue_cost": 0,
+        "effect": {
+            "type": "dodge",
+            "target": "player",
+            "duration": 1
+        }
     },
     frozenset(["Coup puissant", "Magie psychique"]): {
         "result": "Emprise mentale",
@@ -282,7 +294,12 @@ fusion_recipes = {
         "element": "psychic",
         "description": "Vous prenez contrôle de votre ennemi !",
         "mana_cost": 20,
-        "fatigue_cost": 0
+        "fatigue_cost": 0,
+        "effect": {
+            "type": "stun",
+            "target": "enemy",
+            "duration": 1
+        }
     },
     frozenset(["Parade", "Magie élémentaire Feu"]): {
         "result": "Bouclier de feu",
@@ -329,10 +346,41 @@ fusion_recipes = {
         "mana_cost": 20,
         "fatigue_cost": 5
     },
+
+            #   ------  ITEMS CONSOMABLES --------
+
     frozenset(["Potion de soin", "Potion de soin"]): {
         "result": "Potion de soin supérieure",
-        "description": "Une potion a la régénération de PV bien plus importante.",
-        "consumable": True
+        "description": "Une potion à la régénération de PV bien plus importante.",
+        "consumable": True,
+        "effect": {
+            "type": "heal",
+            "target": "player",
+            "value": 50
+        }
+    },
+    frozenset(["Potion de mana", "Potion de repos"]): {
+        "result": "Potion de récupération",
+        "description": "Une potion qui régénère le corps et l'esprit.",
+        "consumable": True,
+        "effect": {
+            "type": "ressource_refill", # Le type ressource_refill doit régénrer des MP et de la fatigue
+            "target": "player",
+            "value": 50
+        }
+    },
+    frozenset(["Potion de poison", "Filet"]): {
+        "result": "Filet empoisonné",
+        "description": "Un filet qui empoisonne et immobilise l'ennemi.",
+        "consumable": True,
+        "effect": {
+            "type": "poison_stun",
+            "target": "enemy",
+            "duration": 3,
+            "damage_per_turn": 3,
+            "stun_duration": 1,
+            "element": "poison"
+        }
     },
     frozenset(["Potion de soin", "Potion de poison"]): {
         "result": "Potion de poison auto-soignant",
@@ -393,7 +441,13 @@ fusion_recipes = {
     frozenset(["Potion de mana", "Potion de repos"]): {
         "result": "Potion de récupération",
         "consumable": True
-    },
+    }
+}
+
+
+# Items enchantés : pas encore implémenté
+"""
+,
     frozenset(["Épée courte", "Magie élémentaire Feu"]): {
     "result": "Épée enflammée",
     "description": "Une épée courte enveloppée de flammes.",
@@ -405,3 +459,4 @@ fusion_recipes = {
         "enchanted": True
     }
 }
+"""

@@ -39,7 +39,13 @@ fusion_recipes = {
         "element": "force",
         "description": "Vous frappez avec votre bouclier !",
         "mana_cost": 0,
-        "fatigue_cost": 10
+        "fatigue_cost": 10,
+        "effect": {
+            "type": "damage_reduction",
+            "target": "player",
+            "duration": 1,
+            "reduction_factor": 0.5 
+        }
     },
     frozenset(["Coup simple", "Épée courte"]): {
         "result": "Frappe à l'épée",
@@ -377,14 +383,14 @@ fusion_recipes = {
             "type": "poison_stun",
             "target": "enemy",
             "duration": 3,
-            "damage_per_turn": 3,
+            "damage_per_turn": 5,
             "stun_duration": 1,
             "element": "poison"
         }
     },
     frozenset(["Potion de soin", "Potion de poison"]): {
         "result": "Potion de poison auto-soignant",
-        "description": "Une potion qui vous infige des dégâts mais vous soigne..?",
+        "description": "Une potion qui infige des dégâts mais soigne..?",
         "consumable": True
     },
     frozenset(["Potion de soin", "Bombe l\u00e9g\u00e8re"]) :{
@@ -423,7 +429,6 @@ fusion_recipes = {
         "consumable": True
     },
     frozenset(["Potion de poison", "Bombe fumig\u00e8ne"]): "Bombe de fumée empoisonnante",
-    frozenset(["Potion de poison", "Filet"]): "Filet empoisonné",
     frozenset(["Bombe l\u00e9g\u00e8re", "Bombe l\u00e9g\u00e8re"]): "Bombe lourde",
     frozenset(["Bombe l\u00e9g\u00e8re", "Bombe lourde"]): "Bombe lourde puissante",
     frozenset(["Bombe l\u00e9g\u00e8re", "Bombe fumig\u00e8ne"]): "Bombe de fumée explosive",

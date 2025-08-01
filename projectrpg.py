@@ -4,7 +4,7 @@ import random
 import os
 import csv
 
-CURRENT_VERSION = "0.1.2"
+CURRENT_VERSION = "0.1.3"
 VERSION_NAME = "Pre-Alpha"
 
 SAVE_FILE = "save.csv"
@@ -172,24 +172,40 @@ def open_inventaire_window():
                 anchor="w"
             ).pack(fill="x", padx=20, pady=(8, 0))
 
-            # Si c'est une compétence (pas un objet consommable ou enchanté)
+            # Si c'est une compétence (pas un consommable ni un objet enchanté)
             if fusion_info and not fusion_info.get("consumable", False) and not fusion_info.get("enchanted", False):
                 desc = fusion_info.get("description", "Pas de description")
                 mana_cost = fusion_info.get("mana_cost", 0)
                 fatigue_cost = fusion_info.get("fatigue_cost", 0)
+                damage_type = fusion_info.get("damage_type", "inconnu")
+                element = fusion_info.get("element", "aucun")
 
-                # Affiche la description
+                # Effets spéciaux
+                effect_text = ""
+                effect = fusion_info.get("effect")
+                if effect:
+                    etype = effect.get("type", "")
+                    if etype:
+                        effect_text = f"Effet : {etype}"
+                        if etype == "poison":
+                            effect_text += f" ({effect.get('damage_per_turn', 0)}/tour pendant {effect.get('duration', 0)} tours)"
+                        elif etype == "stun":
+                            effect_text += f" (étourdit {effect.get('duration', 0)} tours)"
+                        elif etype == "dodge":
+                            effect_text += f" (esquive {effect.get('duration', 0)} attaques)"
+
+                # Description
                 tk.Label(
                     scroll_frame,
                     text=f"   {desc}",
                     font=("Verdana", 10),
                     bg="#fff9ec",
                     anchor="w",
-                    wraplength=350,
+                    wraplength=450,
                     justify="left"
                 ).pack(fill="x", padx=40)
 
-                # Affiche les coûts
+                # Coût
                 tk.Label(
                     scroll_frame,
                     text=f"   Coût : {mana_cost} mana, {fatigue_cost} fatigue",
@@ -197,6 +213,25 @@ def open_inventaire_window():
                     bg="#fff9ec",
                     anchor="w"
                 ).pack(fill="x", padx=40)
+
+                # Type de dégâts et élément
+                tk.Label(
+                    scroll_frame,
+                    text=f"   Type : {damage_type} | Élément : {element}",
+                    font=("Verdana", 9),
+                    bg="#fff9ec",
+                    anchor="w"
+                ).pack(fill="x", padx=40)
+
+                # Effets spéciaux s'il y en a
+                if effect_text:
+                    tk.Label(
+                        scroll_frame,
+                        text=f"   {effect_text}",
+                        font=("Verdana", 9),
+                        bg="#fff9ec",
+                        anchor="w"
+                    ).pack(fill="x", padx=40)
 
     else:
         tk.Label(
@@ -618,10 +653,15 @@ def open_rpg_ui_window():
             percent = max(min(value / max_value, 1), 0)
             canvas.coords(bar, 0, 0, 200 * percent, 20)
             label.config(text=f"{value}/{max_value}")
-        set_bar(player_hp_canvas, player_hp_bar, player_hp_label, player_hp["value"], 100)
-        set_bar(enemy_hp_canvas, enemy_hp_bar, enemy_hp_label, enemy_hp["value"], 100)
-        set_bar(mana_canvas, mana_bar, mana_label, player_mana["value"], 100)
-        set_bar(fatigue_canvas, fatigue_bar, fatigue_label, player_fatigue["value"], 100)
+        set_bar(player_hp_canvas, player_hp_bar, player_hp_label,
+                player_hp["value"], player_stats["max_hp"])
+        set_bar(enemy_hp_canvas, enemy_hp_bar, enemy_hp_label,
+                enemy_hp["value"], current_enemy.get("hp", 100))
+        set_bar(mana_canvas, mana_bar, mana_label,
+                player_mana["value"], player_stats["max_mana"])
+        set_bar(fatigue_canvas, fatigue_bar, fatigue_label,
+                player_fatigue["value"], player_stats["max_fatigue"])
+
         update_item_display()
 
     def log_message(message, flash=False):
@@ -667,7 +707,16 @@ def open_rpg_ui_window():
         if enemy_hp["value"] <= 0:
             return
         damage = random.randint(*current_enemy["damage_range"])
+        if "damage_reduction" in player_status_effects:
+            dr = player_status_effects["damage_reduction"]
+            damage = int(damage * dr["reduction_factor"])
+            dr["duration"] -= 1
+            log_message(f"🛡️ Réduction des dégâts active ! Les dégâts sont réduits à {damage}.")
+            if dr["duration"] <= 0:
+                del player_status_effects["damage_reduction"]
+
         player_hp["value"] -= damage
+
         log_message(f"⚠️ {current_enemy['name']} vous inflige {damage} de dégâts.")
         show_floating_text(rpg_window, damage, "red")
         if player_hp["value"] <= 0:
@@ -779,45 +828,147 @@ def open_rpg_ui_window():
                 frame.pack(pady=3, fill=tk.X)
                 item_frames.append(frame)
                 tk.Label(frame, text=item, font=("Verdana", 10)).pack(anchor="w")
-                tk.Button(frame, text="Utiliser", font=("Verdana", 9), command=lambda i=item: use_item(i)).pack(pady=2)
+                tk.Button(
+                    frame,
+                    text="Utiliser sur soi",
+                    font=("Verdana", 9),
+                    command=lambda i=item: use_item(i, target="self")
+                ).pack(pady=2, side=tk.LEFT)
+                tk.Button(
+                    frame,
+                    text="Jeter sur l'ennemi",
+                    font=("Verdana", 9),
+                    command=lambda i=item: use_item(i, target="enemy")
+                ).pack(pady=2, side=tk.LEFT)
 
-    def use_item(item):
+    def use_item(item, target="self"):
         disable_all_actions()
-        is_consumable_fusion = False
+
+        # Check if item is a consumable fusion (from fusion_recipes_lists)
+        fusion_data = None
         for recipe in fusion_recipes.values():
             if isinstance(recipe, dict) and recipe.get("result") == item and recipe.get("consumable"):
-                is_consumable_fusion = True
+                fusion_data = recipe
                 break
 
+        # Remove from inventory if it's a consumable (either purchased or crafted)
         if item in purchased_items:
             purchased_items.remove(item)
-        elif not is_consumable_fusion:
+        elif not fusion_data:
             log_message(f"❌ Vous ne possédez pas {item}.")
             enable_all_actions()
             return
 
+        # Helper for applying effects
+        def apply_consumable_effect():
+            # Handle consumable effects defined in fusion_recipes_lists.py
+            if fusion_data and "effect" in fusion_data:
+                eff = fusion_data["effect"]
+                etype = eff["type"]
+                tgt = target  # use chosen target
+
+                if etype == "heal":
+                    heal_value = eff.get("value", 0)
+                    if tgt == "self":
+                        player_hp["value"] = min(player_stats["max_hp"], player_hp["value"] + heal_value)
+                        log_message(f"🧪 Vous récupérez {heal_value} PV.")
+                    else:
+                        enemy_hp["value"] = min(current_enemy.get("hp", 100), enemy_hp["value"] + heal_value)
+                        log_message(f"Vous soignez {current_enemy['name']} de {heal_value} PV.")
+                elif etype == "ressource_refill":
+                    value = eff.get("value", 0)
+                    if tgt == "self":
+                        player_mana["value"] = min(player_stats["max_mana"], player_mana["value"] + value)
+                        player_fatigue["value"] = max(0, player_fatigue["value"] - value)
+                        log_message(f"🧪 Vous régénérez {value} mana et réduisez votre fatigue de {value}.")
+                    else:
+                        log_message(f"🤷 Vous jetez {item} sur {current_enemy['name']}... Aucun effet.")
+                elif etype == "poison_stun":
+                    if tgt == "enemy":
+                        apply_status_effect("poison", enemy_status_effects,
+                                            duration=eff.get("duration", 0),
+                                            damage_per_turn=eff.get("damage_per_turn", 0),
+                                            element=eff.get("element", "poison"))
+                        enemy_status_effects["stun"] = {"duration": eff.get("stun_duration", 1)}
+                        log_message(f"☠️ {current_enemy['name']} est empoisonné et étourdi !")
+                    else:
+                        apply_status_effect("poison", player_status_effects,
+                                            duration=eff.get("duration", 0),
+                                            damage_per_turn=eff.get("damage_per_turn", 0),
+                                            element=eff.get("element", "poison"))
+                        log_message(f"☠️ Vous vous êtes empoisonné et étourdi !")
+                elif etype == "damage_reduction":
+                    if tgt == "self":
+                        player_status_effects["damage_reduction"] = {
+                            "duration": eff.get("duration", 1),
+                            "reduction_factor": eff.get("reduction_factor", 0.5)
+                        }
+                        log_message(f"🛡️ Vous bénéficiez d'une réduction de dégâts pendant {eff.get('duration', 1)} attaques !")
+                    else:
+                        # If you throw it at the enemy, maybe protect them instead
+                        enemy_status_effects["damage_reduction"] = {
+                            "duration": eff.get("duration", 1),
+                            "reduction_factor": eff.get("reduction_factor", 0.5)
+                        }
+                        log_message(f"🛡️ {current_enemy['name']} bénéficie d'une réduction de dégâts pendant {eff.get('duration', 1)} attaques !")
+
+                else:
+                    log_message(f"❓ Effet {etype} non encore géré pour {item}.")
+                return True
+            return False
+
+        # If the item is a fusion consumable and has an effect, apply it and skip the old hardcoded logic
+        if fusion_data and apply_consumable_effect():
+            def continue_after_delay():
+                enemy_attack()
+                update_bars()
+                rpg_window.after(1500, enable_all_actions)
+            rpg_window.after(1000, continue_after_delay)
+            return
+
+        # --- Hardcoded fallback for base items ---
         if item == "Potion de soin":
-            player_hp["value"] = min(100, player_hp["value"] + 25)
-            log_message("🧪 Vous utilisez une potion de soin et récupérez 25 PV.")
+            if target == "self":
+                player_hp["value"] = min(player_stats["max_hp"], player_hp["value"] + 25)
+                log_message("🧪 Vous buvez une potion de soin et récupérez 25 PV.")
+            else:
+                enemy_hp["value"] = min(current_enemy.get("hp", 100), enemy_hp["value"] + 25)
+                log_message(f"😈 Vous lancez une potion de soin sur {current_enemy['name']} et il récupère 25 PV.")
         elif item == "Potion de soin supérieure":
-            player_hp["value"] = min(100, player_hp["value"] + 50)
-            log_message("🧪 Vous utilisez une potion de soin supérieure et récupérez 50 PV.")
+            if target == "self":
+                player_hp["value"] = min(player_stats["max_hp"], player_hp["value"] + 50)
+                log_message("🧪 Vous buvez une potion de soin supérieure et récupérez 50 PV.")
+            else:
+                enemy_hp["value"] = min(current_enemy.get("hp", 100), enemy_hp["value"] + 50)
+                log_message(f"😈 Vous lancez une potion de soin supérieure sur {current_enemy['name']} et il récupère 50 PV.")
         elif item == "Potion de mana":
-            player_mana["value"] = min(100, player_mana["value"] + 50)
-            log_message("🧪 Vous utilisez une potion de mana et récupérez 50 de mana.")
+                if target == "self":
+                    player_mana["value"] = min(player_stats["max_mana"], player_mana["value"] + 50)
+                    log_message("🧪 Vous buvez une potion de mana et récupérez 50 de mana.")
+                else:
+                    log_message(f"🤷 Vous jetez une potion de mana sur {current_enemy['name']}. Aucun effet.")
+        elif item == "Potion de poison":
+            if target == "self":
+                player_hp["value"] -= 25
+                log_message("☠️ Vous buvez une potion de poison. Vous perdez 25 PV !")
+            else:
+                enemy_hp["value"] -= 25
+                log_message(f"☠️ Vous jetez une potion de poison sur {current_enemy['name']} ! Il perd 25 PV.")
         elif item == "Potion de repos":
-            player_fatigue["value"] = max(0, player_fatigue["value"] - 50)
-            log_message("🧪 Vous utilisez une potion de repos et récupérez 50 de fatigue.")
+            if target == "self":
+                player_fatigue["value"] = max(0, player_fatigue["value"] - 50)
+                log_message("🧪 Vous buvez une potion de repos et récupérez 50 de fatigue.")
+            else:
+                log_message(f"🤷 Vous jetez une potion de repos sur {current_enemy['name']}. Aucun effet.")
         else:
             log_message(f"❓ {item} n'a pas encore d'effet implémenté.")
 
+    def continue_after_delay():
+        enemy_attack()
+        update_bars()
+        rpg_window.after(1500, enable_all_actions)
 
-        def continue_after_delay():
-            enemy_attack()
-            update_bars()
-            rpg_window.after(1500, enable_all_actions)
-
-        rpg_window.after(1000, continue_after_delay)
+    rpg_window.after(1000, continue_after_delay)
 
     def attack():
         disable_all_actions()

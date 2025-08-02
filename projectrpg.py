@@ -4,7 +4,7 @@ import random
 import os
 import csv
 
-CURRENT_VERSION = "0.1.3"
+CURRENT_VERSION = "0.1.4"
 VERSION_NAME = "Pre-Alpha"
 
 SAVE_FILE = "save.csv"
@@ -193,6 +193,8 @@ def open_inventaire_window():
                             effect_text += f" (étourdit {effect.get('duration', 0)} tours)"
                         elif etype == "dodge":
                             effect_text += f" (esquive {effect.get('duration', 0)} attaques)"
+                        elif etype == "damage_reduction":
+                            effect_text += f" (réduit les dégâts de moitié pour {effect.get('duration', 0)} tours)"
 
                 # Description
                 tk.Label(

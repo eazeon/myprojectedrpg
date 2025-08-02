@@ -126,7 +126,13 @@ fusion_recipes = {
         "element": "force",
         "description": "Vous abbattez votre bouclier violemment !",
         "mana_cost": 0,
-        "fatigue_cost": 15
+        "fatigue_cost": 15,
+        "effect": {
+            "type": "damage_reduction",
+            "target": "player",
+            "duration": 1,
+            "reduction_factor": 0.5 
+        }
     },
     frozenset(["Parade", "Épée courte"]): {
         "result": "Parade à l'épée",
@@ -180,7 +186,13 @@ fusion_recipes = {
         "element": "force",
         "description": "Vous prenez une posture défensive au bouclier !",
         "mana_cost": 0,
-        "fatigue_cost": 10
+        "fatigue_cost": 10,
+        "effect": {
+            "type": "damage_reduction",
+            "target": "player",
+            "duration": 1,
+            "reduction_factor": 0.5 
+        }
     },
     frozenset(["Coup simple", "Magie élémentaire Feu"]): {
         "result": "Boule de feu simple",
@@ -314,7 +326,13 @@ fusion_recipes = {
         "element": "fire",
         "description": "Vous prenez une posture défensive avec vos flammes !",
         "mana_cost": 15,
-        "fatigue_cost": 5
+        "fatigue_cost": 5,
+        "effect": {
+            "type": "damage_reduction",
+            "target": "player",
+            "duration": 1,
+            "reduction_factor": 0.5 
+        }
     },
     frozenset(["Parade", "Magie élémentaire Air"]): {
         "result": "Bouclier d'air",
@@ -323,7 +341,13 @@ fusion_recipes = {
         "element": "wind",
         "description": "Vous prenez une posture défensive avec vos bourrasques !",
         "mana_cost": 10,
-        "fatigue_cost": 10
+        "fatigue_cost": 10,
+        "effect": {
+            "type": "damage_reduction",
+            "target": "player",
+            "duration": 1,
+            "reduction_factor": 0.5 
+        }
     },
     frozenset(["Parade", "Magie élémentaire Eau"]): {
         "result": "Bouclier d'eau",
@@ -332,7 +356,13 @@ fusion_recipes = {
         "element": "eau",
         "description": "Vous prenez une posture défensive avec votre eau !",
         "mana_cost": 10,
-        "fatigue_cost": 10
+        "fatigue_cost": 10,
+        "effect": {
+            "type": "damage_reduction",
+            "target": "player",
+            "duration": 1,
+            "reduction_factor": 0.5 
+        }
     },
     frozenset(["Parade", "Magie élémentaire Terre"]): {
         "result": "Bouclier de terre",
@@ -341,7 +371,13 @@ fusion_recipes = {
         "element": "earth",
         "description": "Vous prenez une posture défensive renforcée par la terre !",
         "mana_cost": 10,
-        "fatigue_cost": 10
+        "fatigue_cost": 10,
+        "effect": {
+            "type": "damage_reduction",
+            "target": "player",
+            "duration": 1,
+            "reduction_factor": 0.5 
+        }
     },
     frozenset(["Parade", "Magie d'illusion"]): {
         "result": "Illusion du bras",

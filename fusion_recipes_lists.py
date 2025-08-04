@@ -141,7 +141,13 @@ fusion_recipes = {
         "element": "force",
         "description": "Vous prenez une posture défensive à l'épée!",
         "mana_cost": 0,
-        "fatigue_cost": 10
+        "fatigue_cost": 10,
+        "effect": {
+            "type": "parade_stance",
+            "target": "player",
+            "duration": 1
+        }
+
     },
     frozenset(["Parade", "Épée longue"]): {
         "result": "Parade avec épée lourde",
@@ -501,3 +507,4 @@ fusion_recipes = {
     }
 }
 """
+

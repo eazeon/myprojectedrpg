@@ -217,13 +217,16 @@ def open_inventaire_window():
                 ).pack(fill="x", padx=40)
 
                 # Type de dégâts et élément
+                # Afficher les dégâts
+                damage = fusion_info.get("damage", 0)
                 tk.Label(
                     scroll_frame,
-                    text=f"   Type : {damage_type} | Élément : {element}",
+                    text=f"   Dégâts : {damage}",
                     font=("Verdana", 9),
                     bg="#fff9ec",
                     anchor="w"
                 ).pack(fill="x", padx=40)
+
 
                 # Effets spéciaux s'il y en a
                 if effect_text:
@@ -716,6 +719,25 @@ def open_rpg_ui_window():
             log_message(f"🛡️ Réduction des dégâts active ! Les dégâts sont réduits à {damage}.")
             if dr["duration"] <= 0:
                 del player_status_effects["damage_reduction"]
+        
+        damage = random.randint(*current_enemy["damage_range"])
+
+        if "parade_stance" in player_status_effects:
+            effect = player_status_effects["parade_stance"]
+    
+            reflected_damage = damage
+            player_hp_blocked = damage 
+            player_hp["value"] -= 0  
+
+            enemy_hp["value"] -= reflected_damage
+
+            log_message(f"🛡️ Parade parfaite ! Vous bloquez {player_hp_blocked} dégâts et les renvoyez à {current_enemy['name']}.")
+
+            effect["duration"] -= 1
+            if effect["duration"] <= 0:
+                del player_status_effects["parade_stance"]
+            return
+
 
         player_hp["value"] -= damage
 
@@ -752,6 +774,14 @@ def open_rpg_ui_window():
             elif effect["type"] == "dodge" and target == "player":
                 player_status_effects["dodge"] = {"duration": effect["duration"]}
                 log_message("💨 Vous êtes prêt à esquiver la prochaine attaque !")
+            elif effect["type"] == "parade_stance" and target == "player":
+                player_status_effects["parade_stance"] = {
+                    "duration": effect["duration"],
+                    "reduction_factor": effect["reduction_factor"],
+                    "reflect_factor": effect["reflect_factor"]
+                }
+                log_message("🛡️ Vous êtes en position de parade : dégâts réduits et renvoyés à l'ennemi.")
+
 
         # XP
         if skill_data["damage_type"] == "magic":
@@ -1160,4 +1190,5 @@ window.protocol("WM_DELETE_WINDOW", on_close)
 window.mainloop()
 
 window.mainloop()
+
 

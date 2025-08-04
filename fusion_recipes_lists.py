@@ -39,7 +39,13 @@ fusion_recipes = {
         "element": "force",
         "description": "Vous frappez avec votre bouclier !",
         "mana_cost": 0,
-        "fatigue_cost": 10
+        "fatigue_cost": 10,
+        "effect": {
+            "type": "damage_reduction",
+            "target": "player",
+            "duration": 1,
+            "reduction_factor": 0.5 
+        }
     },
     frozenset(["Coup simple", "Épée courte"]): {
         "result": "Frappe à l'épée",
@@ -120,7 +126,13 @@ fusion_recipes = {
         "element": "force",
         "description": "Vous abbattez votre bouclier violemment !",
         "mana_cost": 0,
-        "fatigue_cost": 15
+        "fatigue_cost": 15,
+        "effect": {
+            "type": "damage_reduction",
+            "target": "player",
+            "duration": 1,
+            "reduction_factor": 0.5 
+        }
     },
     frozenset(["Parade", "Épée courte"]): {
         "result": "Parade à l'épée",
@@ -129,7 +141,13 @@ fusion_recipes = {
         "element": "force",
         "description": "Vous prenez une posture défensive à l'épée!",
         "mana_cost": 0,
-        "fatigue_cost": 10
+        "fatigue_cost": 10,
+        "effect": {
+            "type": "parade_stance",
+            "target": "player",
+            "duration": 1
+        }
+
     },
     frozenset(["Parade", "Épée longue"]): {
         "result": "Parade avec épée lourde",
@@ -174,7 +192,13 @@ fusion_recipes = {
         "element": "force",
         "description": "Vous prenez une posture défensive au bouclier !",
         "mana_cost": 0,
-        "fatigue_cost": 10
+        "fatigue_cost": 10,
+        "effect": {
+            "type": "damage_reduction",
+            "target": "player",
+            "duration": 1,
+            "reduction_factor": 0.5 
+        }
     },
     frozenset(["Coup simple", "Magie élémentaire Feu"]): {
         "result": "Boule de feu simple",
@@ -228,7 +252,14 @@ fusion_recipes = {
         "element": "psychic",
         "description": "Vous projetez une décharge mentale !",
         "mana_cost": 15,
-        "fatigue_cost": 0
+        "fatigue_cost": 0,
+        "effect": {
+            "type": "poison",
+            "target": "enemy",
+            "duration": 3,
+            "damage_per_turn": 4,
+            "element": "psychic"
+        }
     },
     frozenset(["Coup puissant", "Magie élémentaire Feu"]): {
         "result": "Colonne de flamme",
@@ -273,7 +304,12 @@ fusion_recipes = {
         "element": "illusion",
         "description": "Vous créez une image rémanent de vous-même !",
         "mana_cost": 20,
-        "fatigue_cost": 0
+        "fatigue_cost": 0,
+        "effect": {
+            "type": "dodge",
+            "target": "player",
+            "duration": 1
+        }
     },
     frozenset(["Coup puissant", "Magie psychique"]): {
         "result": "Emprise mentale",
@@ -282,7 +318,12 @@ fusion_recipes = {
         "element": "psychic",
         "description": "Vous prenez contrôle de votre ennemi !",
         "mana_cost": 20,
-        "fatigue_cost": 0
+        "fatigue_cost": 0,
+        "effect": {
+            "type": "stun",
+            "target": "enemy",
+            "duration": 1
+        }
     },
     frozenset(["Parade", "Magie élémentaire Feu"]): {
         "result": "Bouclier de feu",
@@ -291,7 +332,13 @@ fusion_recipes = {
         "element": "fire",
         "description": "Vous prenez une posture défensive avec vos flammes !",
         "mana_cost": 15,
-        "fatigue_cost": 5
+        "fatigue_cost": 5,
+        "effect": {
+            "type": "damage_reduction",
+            "target": "player",
+            "duration": 1,
+            "reduction_factor": 0.5 
+        }
     },
     frozenset(["Parade", "Magie élémentaire Air"]): {
         "result": "Bouclier d'air",
@@ -300,7 +347,13 @@ fusion_recipes = {
         "element": "wind",
         "description": "Vous prenez une posture défensive avec vos bourrasques !",
         "mana_cost": 10,
-        "fatigue_cost": 10
+        "fatigue_cost": 10,
+        "effect": {
+            "type": "damage_reduction",
+            "target": "player",
+            "duration": 1,
+            "reduction_factor": 0.5 
+        }
     },
     frozenset(["Parade", "Magie élémentaire Eau"]): {
         "result": "Bouclier d'eau",
@@ -309,7 +362,13 @@ fusion_recipes = {
         "element": "eau",
         "description": "Vous prenez une posture défensive avec votre eau !",
         "mana_cost": 10,
-        "fatigue_cost": 10
+        "fatigue_cost": 10,
+        "effect": {
+            "type": "damage_reduction",
+            "target": "player",
+            "duration": 1,
+            "reduction_factor": 0.5 
+        }
     },
     frozenset(["Parade", "Magie élémentaire Terre"]): {
         "result": "Bouclier de terre",
@@ -318,7 +377,13 @@ fusion_recipes = {
         "element": "earth",
         "description": "Vous prenez une posture défensive renforcée par la terre !",
         "mana_cost": 10,
-        "fatigue_cost": 10
+        "fatigue_cost": 10,
+        "effect": {
+            "type": "damage_reduction",
+            "target": "player",
+            "duration": 1,
+            "reduction_factor": 0.5 
+        }
     },
     frozenset(["Parade", "Magie d'illusion"]): {
         "result": "Illusion du bras",
@@ -329,12 +394,25 @@ fusion_recipes = {
         "mana_cost": 20,
         "fatigue_cost": 5
     },
+
+            #   ------  ITEMS CONSOMABLES --------
+
     frozenset(["Potion de soin", "Potion de soin"]): {
         "result": "Potion de soin supérieure",
         "description": "Une potion à la régénération de PV bien plus importante.",
         "consumable": True,
         "effect": {
             "type": "heal",
+            "target": "player",
+            "value": 50
+        }
+    },
+    frozenset(["Potion de mana", "Potion de repos"]): {
+        "result": "Potion de récupération",
+        "description": "Une potion qui régénère le corps et l'esprit.",
+        "consumable": True,
+        "effect": {
+            "type": "ressource_refill", # Le type ressource_refill doit régénrer des MP et de la fatigue
             "target": "player",
             "value": 50
         }
@@ -347,14 +425,14 @@ fusion_recipes = {
             "type": "poison_stun",
             "target": "enemy",
             "duration": 3,
-            "damage_per_turn": 3,
+            "damage_per_turn": 5,
             "stun_duration": 1,
             "element": "poison"
         }
     },
     frozenset(["Potion de soin", "Potion de poison"]): {
         "result": "Potion de poison auto-soignant",
-        "description": "Une potion qui vous infige des dégâts mais vous soigne..?",
+        "description": "Une potion qui infige des dégâts mais soigne..?",
         "consumable": True
     },
     frozenset(["Potion de soin", "Bombe l\u00e9g\u00e8re"]) :{
@@ -393,7 +471,6 @@ fusion_recipes = {
         "consumable": True
     },
     frozenset(["Potion de poison", "Bombe fumig\u00e8ne"]): "Bombe de fumée empoisonnante",
-    frozenset(["Potion de poison", "Filet"]): "Filet empoisonné",
     frozenset(["Bombe l\u00e9g\u00e8re", "Bombe l\u00e9g\u00e8re"]): "Bombe lourde",
     frozenset(["Bombe l\u00e9g\u00e8re", "Bombe lourde"]): "Bombe lourde puissante",
     frozenset(["Bombe l\u00e9g\u00e8re", "Bombe fumig\u00e8ne"]): "Bombe de fumée explosive",
@@ -411,7 +488,13 @@ fusion_recipes = {
     frozenset(["Potion de mana", "Potion de repos"]): {
         "result": "Potion de récupération",
         "consumable": True
-    },
+    }
+}
+
+
+# Items enchantés : pas encore implémenté
+"""
+,
     frozenset(["Épée courte", "Magie élémentaire Feu"]): {
     "result": "Épée enflammée",
     "description": "Une épée courte enveloppée de flammes.",
@@ -423,3 +506,5 @@ fusion_recipes = {
         "enchanted": True
     }
 }
+"""
+

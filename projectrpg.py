@@ -4,7 +4,7 @@ import random
 import os
 import csv
 
-CURRENT_VERSION = "0.1.4"
+CURRENT_VERSION = "0.1.6"
 VERSION_NAME = "Pre-Alpha"
 
 SAVE_FILE = "save.csv"
@@ -549,6 +549,52 @@ def open_rpg_ui_window():
     bars_frame = tk.Frame(left_frame)
     bars_frame.pack(pady=10)
 
+    status_frame = tk.Frame(left_frame)
+    status_frame.pack(pady=5)
+
+    player_status_text = None
+    enemy_status_text = None
+
+
+    def update_status_display():
+        def format_status(status_dict):
+            if not status_dict:
+                return "Aucun"
+            lines = []
+            for effect, data in status_dict.items():
+                dur = data.get("duration", "?")
+                if effect == "poison":
+                    lines.append(f"☠️ Poison ({data['damage_per_turn']}/tour, {dur} tours)")
+                elif effect == "burn":
+                    lines.append(f"🔥 Brûlure ({data['damage_per_turn']}/tour, {dur} tours)")
+                elif effect == "stun":
+                    lines.append(f"💫 Étourdi ({dur} tours)")
+                elif effect == "dodge":
+                    lines.append(f"💨 Esquive ({dur} tours)")
+                elif effect == "damage_reduction":
+                    lines.append(f"🛡️ Réduction de dégâts ({dur} tours)")
+                elif effect == "parade_stance":
+                    lines.append(f"🪞 Parade parfaite ({dur} tours)")
+                elif effect == "accuracy_down":
+                    lines.append(f"🎯 Précision réduite ({dur} tours)")
+                else:
+                    lines.append(f"❓ {effect} ({dur} tours)")
+            return "\n".join(lines)
+        player_status_text.config(text=format_status(player_status_effects))
+        enemy_status_text.config(text=format_status(enemy_status_effects))
+
+    status_frame = tk.Frame(left_frame)
+    status_frame.pack(pady=5)
+
+    tk.Label(status_frame, text="🧍 Statuts joueur : ", font=("Verdana", 10, "bold"), anchor="w", justify="left").pack(fill="x", padx=10)
+    player_status_text = tk.Label(status_frame, text="", font=("Verdana", 9), anchor="w", justify="left")
+    player_status_text.pack(fill="x", padx=20)
+
+    tk.Label(status_frame, text="👹 Statuts ennemi : ", font=("Verdana", 10, "bold"), anchor="w", justify="left").pack(fill="x", padx=10)
+    enemy_status_text = tk.Label(status_frame, text="", font=("Verdana", 9), anchor="w", justify="left")
+    enemy_status_text.pack(fill="x", padx=20)
+
+
     def show_floating_text(parent, text, color="red", duration=800):
         floating = tk.Label(parent, text=text, fg=color, font=("Verdana", 14, "bold"))
         floating.place(x=100, y=100)
@@ -596,14 +642,18 @@ def open_rpg_ui_window():
     def process_status_effects():
         to_remove = []
         for effect, data in enemy_status_effects.items():
-            enemy_hp["value"] -= data["damage_per_turn"]
-            log_message(f"🔥 {current_enemy['name']} subit {data['damage_per_turn']} dégâts de {effect}.")
-            show_floating_text(rpg_window, data["damage_per_turn"], "orange")
+            if "damage_per_turn" in data:
+                enemy_hp["value"] -= data["damage_per_turn"]
+                log_message(f"🔥 {current_enemy['name']} subit {data['damage_per_turn']} dégâts de {effect}.")
+                show_floating_text(rpg_window, data["damage_per_turn"], "orange")
+        
             data["duration"] -= 1
             if data["duration"] <= 0:
                 to_remove.append(effect)
+
         for effect in to_remove:
             del enemy_status_effects[effect]
+
 
     def start_next_fight():
         if fight_counter["count"] >= 5:
@@ -623,6 +673,7 @@ def open_rpg_ui_window():
         enemy_status_effects.clear()
 
         update_bars()
+        update_status_display()
         log_message(f"⚔️ Combat {fight_counter['count']} commencé contre {current_enemy['name']} !")
         update_skills_display()
 
@@ -707,6 +758,19 @@ def open_rpg_ui_window():
                 if enemy_status_effects["stun"]["duration"] <= 0:
                     del enemy_status_effects["stun"]
                 return
+        if "accuracy_down" in enemy_status_effects:
+            acc = enemy_status_effects["accuracy_down"]
+            if random.random() < acc["chance_to_miss"]:
+                log_message(f"💫 {current_enemy['name']} rate son attaque !")
+                acc["duration"] -= 1
+                if acc["duration"] <= 0:
+                    del enemy_status_effects["accuracy_down"]
+                return
+            else:
+                acc["duration"] -= 1
+                if acc["duration"] <= 0:
+                    del enemy_status_effects["accuracy_down"]
+
 
         process_status_effects()
         if enemy_hp["value"] <= 0:
@@ -736,6 +800,8 @@ def open_rpg_ui_window():
             effect["duration"] -= 1
             if effect["duration"] <= 0:
                 del player_status_effects["parade_stance"]
+            update_bars()
+            update_status_display()
             return
 
 
@@ -776,11 +842,16 @@ def open_rpg_ui_window():
                 log_message("💨 Vous êtes prêt à esquiver la prochaine attaque !")
             elif effect["type"] == "parade_stance" and target == "player":
                 player_status_effects["parade_stance"] = {
-                    "duration": effect["duration"],
-                    "reduction_factor": effect["reduction_factor"],
-                    "reflect_factor": effect["reflect_factor"]
+                    "duration": effect.get("duration", 1)
                 }
-                log_message("🛡️ Vous êtes en position de parade : dégâts réduits et renvoyés à l'ennemi.")
+                log_message("🛡️ Vous adoptez une posture de parade parfaite.")
+            elif effect["type"] == "accuracy_down" and target == "enemy":
+                duration = random.randint(*effect.get("duration_range", [2, 4]))
+                enemy_status_effects["accuracy_down"] = {
+                    "duration": duration,
+                    "chance_to_miss": effect.get("chance_to_miss", 0.5)
+                }
+                log_message(f"🎯 {current_enemy['name']} est désorienté et pourrait rater ses attaques pendant {duration} tours !")
 
 
         # XP
@@ -824,15 +895,23 @@ def open_rpg_ui_window():
             log_message(f"🔥 {current_enemy['name']} est en feu !")
 
         def continue_after_delay():
+            global money
             if enemy_hp["value"] <= 0:
                 log_message(f"✅ {current_enemy['name']} vaincu !")
+                reward = current_enemy.get("bounty", 0)
+                money += reward
+                log_message(f"💰 Vous gagnez {reward} deullars en battant {current_enemy['name']} !")
+                update_main_window()
+
                 start_next_fight()
+                update_status_display()
                 enable_all_actions()
             else:
                 log_message("⏳ L'ennemi se prépare à attaquer...")
                 rpg_window.after(2000, enemy_attack)
                 rpg_window.after(2500, enable_all_actions)
             update_bars()
+            update_status_display()
 
         rpg_window.after(1000, continue_after_delay)
 
@@ -954,6 +1033,7 @@ def open_rpg_ui_window():
             def continue_after_delay():
                 enemy_attack()
                 update_bars()
+                update_status_display()
                 rpg_window.after(1500, enable_all_actions)
             rpg_window.after(1000, continue_after_delay)
             return
@@ -965,14 +1045,14 @@ def open_rpg_ui_window():
                 log_message("🧪 Vous buvez une potion de soin et récupérez 25 PV.")
             else:
                 enemy_hp["value"] = min(current_enemy.get("hp", 100), enemy_hp["value"] + 25)
-                log_message(f"😈 Vous lancez une potion de soin sur {current_enemy['name']} et il récupère 25 PV.")
+                log_message(f"Vous lancez une potion de soin sur {current_enemy['name']} et il récupère 25 PV.")
         elif item == "Potion de soin supérieure":
             if target == "self":
                 player_hp["value"] = min(player_stats["max_hp"], player_hp["value"] + 50)
                 log_message("🧪 Vous buvez une potion de soin supérieure et récupérez 50 PV.")
             else:
                 enemy_hp["value"] = min(current_enemy.get("hp", 100), enemy_hp["value"] + 50)
-                log_message(f"😈 Vous lancez une potion de soin supérieure sur {current_enemy['name']} et il récupère 50 PV.")
+                log_message(f"Vous lancez une potion de soin supérieure sur {current_enemy['name']} et il récupère 50 PV.")
         elif item == "Potion de mana":
                 if target == "self":
                     player_mana["value"] = min(player_stats["max_mana"], player_mana["value"] + 50)
@@ -998,6 +1078,7 @@ def open_rpg_ui_window():
     def continue_after_delay():
         enemy_attack()
         update_bars()
+        update_status_display()
         rpg_window.after(1500, enable_all_actions)
 
     rpg_window.after(1000, continue_after_delay)
@@ -1009,22 +1090,29 @@ def open_rpg_ui_window():
             enable_all_actions()
             return
 
-        damage = random.randint(10, 25)
+        damage = random.randint(5, 15)
         enemy_hp["value"] -= damage
         log_message(f"💥 Vous infligez {damage} de dégâts à {current_enemy['name']}.")
 
         def continue_after_delay():
+            global money
             player_mana["value"] -= 10
             player_fatigue["value"] += 15
             if enemy_hp["value"] <= 0:
                 log_message(f"✅ {current_enemy['name']} vaincu !")
+                reward = current_enemy.get("bounty", 0)
+                money += reward
+                log_message(f"💰 Vous gagnez {reward} deullars en battant {current_enemy['name']} !")
+                update_main_window()
                 start_next_fight()
+                update_status_display()
                 enable_all_actions()
             else:
                 log_message("⏳ L'ennemi se prépare à attaquer...")
                 rpg_window.after(2000, enemy_attack)
                 rpg_window.after(2500, enable_all_actions)
             update_bars()
+            update_status_display()
 
         rpg_window.after(1000, continue_after_delay)
 
@@ -1159,8 +1247,8 @@ frame_bottom_left.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
 
 tk.Label(frame_bottom_left, text="Combat et Quêtes", font=("Verdana", 14, "bold")).pack()
 tk.Button(frame_bottom_left, text="Partir à l'attaque", font=("Verdana", 12), command=open_rpg_ui_window).pack(pady=5)
-tk.Button(frame_bottom_left, text="Quêtes", font=("Verdana", 12), command=open_rpg_wip_window).pack(pady=5)
-tk.Button(frame_bottom_left, text="Carte du monde", font=("Verdana", 12), command=open_rpg_wip_window).pack(pady=5)
+tk.Button(frame_bottom_left, text="Quêtes (WIP)", font=("Verdana", 12), command=open_rpg_wip_window).pack(pady=5)
+tk.Button(frame_bottom_left, text="Carte du monde (WIP)", font=("Verdana", 12), command=open_rpg_wip_window).pack(pady=5)
 
 
 # ----- Catégorie 4 : Options -----

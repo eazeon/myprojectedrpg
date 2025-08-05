@@ -136,12 +136,12 @@ fusion_recipes = {
     },
     frozenset(["Parade", "Épée courte"]): {
         "result": "Parade à l'épée",
-        "damage": 10,
+        "damage": 5,
         "damage_type": "slashing",
         "element": "force",
         "description": "Vous prenez une posture défensive à l'épée!",
         "mana_cost": 0,
-        "fatigue_cost": 10,
+        "fatigue_cost": 25,
         "effect": {
             "type": "parade_stance",
             "target": "player",
@@ -156,48 +156,67 @@ fusion_recipes = {
         "element": "force",
         "description": "Vous prenez une posture défensive à l'épée longue!",
         "mana_cost": 0,
-        "fatigue_cost": 10
+        "fatigue_cost": 45,
+        "effect": {
+            "type": "parade_stance",
+            "target": "player",
+            "duration": 1
+        }
     },
     frozenset(["Parade", "Dague"]): {
         "result": "Blocage à la dague",
-        "damage": 5,
+        "damage": 0,
         "damage_type": "piercing",
         "element": "force",
         "description": "Vous prenez une posture défensive à la dague !",
         "mana_cost": 0,
-        "fatigue_cost": 10
+        "fatigue_cost": 15,
+        "effect": {
+            "type": "parade_stance",
+            "target": "player",
+            "duration": 1
+        }
     },
     frozenset(["Parade", "Hache de guerre"]): {
         "result": "Blocage à la hache",
-        "damage": 15,
+        "damage": 10,
         "damage_type": "slashing",
         "element": "force",
         "description": "Vous prenez une posture défensive à la hache !",
         "mana_cost": 0,
-        "fatigue_cost": 10
+        "fatigue_cost": 25,
+        "effect": {
+            "type": "parade_stance",
+            "target": "player",
+            "duration": 1
+        }
     },
     frozenset(["Parade", "Arc"]): {
         "result": "Blocage avec l'arc",
-        "damage": 10,
+        "damage": 0,
         "damage_type": "slashing",
         "element": "force",
         "description": "Vous prenez une posture défensive à l'arc !",
         "mana_cost": 0,
-        "fatigue_cost": 10
+        "fatigue_cost": 30,
+        "effect": {
+            "type": "parade_stance",
+            "target": "player",
+            "duration": 1
+        }
     },
     frozenset(["Parade", "Bouclier"]): {
         "result": "Blocage au bouclier",
-        "damage": 5,
+        "damage": 0,
         "damage_type": "contondant",
         "element": "force",
         "description": "Vous prenez une posture défensive au bouclier !",
         "mana_cost": 0,
         "fatigue_cost": 10,
         "effect": {
-            "type": "damage_reduction",
+            "type": "parade_stance",
             "target": "player",
-            "duration": 1,
-            "reduction_factor": 0.5 
+            "duration": 1
         }
     },
     frozenset(["Coup simple", "Magie élémentaire Feu"]): {
@@ -243,7 +262,13 @@ fusion_recipes = {
         "element": "illusion",
         "description": "Vous projetez une illusion simple !",
         "mana_cost": 10,
-        "fatigue_cost": 0
+        "fatigue_cost": 0,
+        "effect": {
+            "type": "accuracy_down",
+            "target": "enemy",
+            "duration_range": [2, 4],
+            "chance_to_miss": 0.5
+        }
     },
     frozenset(["Coup simple", "Magie psychique"]): {
         "result": "Décharge mentale",
@@ -302,37 +327,37 @@ fusion_recipes = {
         "damage": 0,
         "damage_type": "state",
         "element": "illusion",
-        "description": "Vous créez une image rémanent de vous-même !",
-        "mana_cost": 20,
+        "description": "Vous créez une image rémanente de vous-même !",
+        "mana_cost": 35,
         "fatigue_cost": 0,
         "effect": {
             "type": "dodge",
             "target": "player",
-            "duration": 1
+            "duration": 2
         }
     },
     frozenset(["Coup puissant", "Magie psychique"]): {
         "result": "Emprise mentale",
-        "damage": 20,
+        "damage": 15,
         "damage_type": "magic",
         "element": "psychic",
         "description": "Vous prenez contrôle de votre ennemi !",
-        "mana_cost": 20,
+        "mana_cost": 35,
         "fatigue_cost": 0,
         "effect": {
             "type": "stun",
             "target": "enemy",
-            "duration": 1
+            "duration": 2
         }
     },
     frozenset(["Parade", "Magie élémentaire Feu"]): {
         "result": "Bouclier de feu",
-        "damage": 15,
+        "damage": 10,
         "damage_type": "magic",
         "element": "fire",
         "description": "Vous prenez une posture défensive avec vos flammes !",
-        "mana_cost": 15,
-        "fatigue_cost": 5,
+        "mana_cost": 10,
+        "fatigue_cost": 10,
         "effect": {
             "type": "damage_reduction",
             "target": "player",

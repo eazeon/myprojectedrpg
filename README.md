@@ -19,7 +19,10 @@ Vous pouvez acheter des techniques de combat, des armes, des formes de magie et 
 Exemple : fusionner la compétence "Coup simple" et "Magie élémentaire de feu" vous donne la compétence "Boule de feu simple".
 Je vous laisse découvrir les différentes fusions et vous amuser avec ;)
 
-Une fois paré au combat vous n'avez plus qu'a cliquer sur "Partir à l'attaque", ce qui déclenchera une phase de combat contre 5 ennemis aléatoire.
+Une fois paré au combat vous n'avez plus qu'a cliquer sur "Partir à l'attaque", ce qui déclenchera une phase de combat contre 5 ennemis aléatoires.
+Chaque ennemi est vulnérable à un type de dégâts (contondant, perçant, coupant, magique) et peut être résistant a un type de dégât en particulier.
+Battre un ennemi vous octroie des pièces et de l'XP globale.
+Utiliser une compétence physique vous octroie de l'XP de force et une compétence magique vous octoire de l'XP magique.
 (Ceci n'est qu'un exemple a terme j'aimerais vous proposer des quêtes que vous pourrez résoudre avec vos éléments)
 
 ----------

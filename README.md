@@ -10,6 +10,8 @@ Alors en attendant j'ai choisi de réaliser ce concept de fusion en utilisant du
 
 Je vous laisse découvrir, en espérant que vous prendrez plaisir à expérimenter !
 
+Note sur l'IA : Oui j'ai utilisé l'IA pour générer du code, via ChatGPT. Je maîtrise un peu la programmation mais ca n'est pas mon vrai travail et je préfère orienter mes efforts de maîtrise de programmation vers Unity pour faire des jeux plus complexes et intéressants. Utiliser l'IA m'a fait gagner un temps phénoménal et sans ça je ne suis pas sûr que j'aurais pu un jour vous proposer cette expérience de jeu. Je tiens néamoins à clarifier un point : TOUTES LES IDEES DE GAME DESIGN viennent de MOI et UNIQUEMENT de MOI. L'IA n'a jamais participé à une décision créative, et m'a uniquement fourni un (solide) support technique.
+
 ----------
 
 # Manuel de jeu
@@ -19,11 +21,16 @@ Vous pouvez acheter des techniques de combat, des armes, des formes de magie et 
 Exemple : fusionner la compétence "Coup simple" et "Magie élémentaire de feu" vous donne la compétence "Boule de feu simple".
 Je vous laisse découvrir les différentes fusions et vous amuser avec ;)
 
+De même, vous avez des objets consommables à votre disposition que vous pouvez aussi fusionner pour de nouveaux effets.
+
 Une fois paré au combat vous n'avez plus qu'a cliquer sur "Partir à l'attaque", ce qui déclenchera une phase de combat contre 5 ennemis aléatoires.
 Chaque ennemi est vulnérable à un type de dégâts (contondant, perçant, coupant, magique) et peut être résistant a un type de dégât en particulier.
 Battre un ennemi vous octroie des pièces et de l'XP globale.
-Utiliser une compétence physique vous octroie de l'XP de force et une compétence magique vous octoire de l'XP magique.
-(Ceci n'est qu'un exemple a terme j'aimerais vous proposer des quêtes que vous pourrez résoudre avec vos éléments)
+Utiliser une compétence physique vous octroie de l'XP de force et une compétence magique vous octroie de l'XP magique.
+Vous pouvez ensuite améliorer vos stats en cliquant sur le bouton assez explicite "Améliorer vos stats" où vous pourrez échanger de l'XP globale contre de la santé, de l'XP de force contre + de fatigue max ou un boost de dégâts de force, et de l'XP magique pour améliorer votre mana max ou un boost de dégâts en magie.
+
+Vous pouvez aussi désormais accéder à certaines quêtes (deux pour le moment) grâce au bouton des quêtes!
+(more to come)
 
 ----------
 

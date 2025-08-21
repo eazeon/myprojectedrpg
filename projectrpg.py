@@ -4,11 +4,50 @@ import random
 import os
 import csv
 
-CURRENT_VERSION = "0.1.6"
-VERSION_NAME = "Pre-Alpha"
+from fusion_recipes_lists import fusion_recipes
+from enemy_types_lists import enemy_types
+from quests_list import quests
+
+CURRENT_VERSION = "0.1.7"
+VERSION_NAME = "Pre-Alpha - Quests update"
 
 SAVE_FILE = "save.csv"
 player_name = ""
+
+def safe_int(value, default=0):
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return default
+
+def safe_float(value, default=0.0):
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return default
+
+
+money = 0
+purchased_items = []
+selected_items = []
+fusion_results = []
+enemy_status_effects = {}
+player_status_effects = {}
+
+player_xp = {
+    "global": 0,
+    "force": 0,
+    "magic": 0
+}
+
+player_stats = {
+    "max_hp": 100,
+    "max_mana": 100,
+    "max_fatigue": 100,
+    "force_bonus": 1.0,
+    "magic_bonus": 1.0
+}
+
 
 def initialize_save():
     global money, purchased_items, fusion_results, player_xp, player_stats, player_name
@@ -21,15 +60,40 @@ def initialize_save():
             player_name = "Joueur"
 
         # Message d'accueil
-        messagebox.showinfo("Bienvenue", f"Bienvenue, {player_name} ! Préparez-vous pour l'aventure.")
+        if player_name == "devzeon":
+            messagebox.showinfo("Bienvenue maître dev", f"Bonjour Maître Devzeon, nous ne vous avions pas reconnu. Nous avons rempli vos stats. Passez un bon débogage")
+            money = 1000000
+            player_xp["global"] = 10000
+            player_xp["force"] = 10000
+            player_xp["magic"] = 10000
+
+            player_stats["max_hp"] = 1000
+            player_stats["max_mana"] = 1000
+            player_stats["max_fatigue"] = 1000
+            player_stats["force_bonus"] = 1.0
+            player_stats["magic_bonus"] = 1.0
+
+        else:
+            messagebox.showinfo("Bienvenue", f"Bienvenue, {player_name} ! Préparez-vous pour l'aventure.")
+            money = 1000
+            player_xp["global"] = 0
+            player_xp["force"] = 0
+            player_xp["magic"] = 0
+
+            player_stats["max_hp"] = 100
+            player_stats["max_mana"] = 100
+            player_stats["max_fatigue"] = 100
+            player_stats["force_bonus"] = 1.0
+            player_stats["magic_bonus"] = 1.0
         
         # Créer un fichier de sauvegarde vide avec les valeurs par défaut
         with open(SAVE_FILE, mode="w", newline='', encoding="utf-8") as file:
             writer = csv.writer(file)
-            writer.writerow(["name", "money", "purchased_items", "fusion_results", "xp_global", "xp_force", "xp_magic",
+            writer.writerow(["name", "money", "purchased_items", "fusion_results", "xp_global", "completed_quests", "xp_force", "xp_magic",
                              "max_hp", "max_mana", "max_fatigue", "force_bonus", "magic_bonus"])
+            completed_ids = [str(q["id"]) for q in quests if q["completed"]]
             writer.writerow([
-                player_name, money, ";".join(purchased_items), ";".join(fusion_results),
+                player_name, money, ";".join(purchased_items), ";".join(fusion_results), ";".join(completed_ids),
                 player_xp["global"], player_xp["force"], player_xp["magic"],
                 player_stats["max_hp"], player_stats["max_mana"], player_stats["max_fatigue"],
                 player_stats["force_bonus"], player_stats["magic_bonus"]
@@ -39,18 +103,31 @@ def initialize_save():
         with open(SAVE_FILE, mode="r", encoding="utf-8") as file:
             reader = csv.DictReader(file)
             data = next(reader)
-            player_name = data["name"]
-            money = int(data["money"])
-            purchased_items[:] = data["purchased_items"].split(";") if data["purchased_items"] else []
-            fusion_results[:] = data["fusion_results"].split(";") if data["fusion_results"] else []
-            player_xp["global"] = int(data["xp_global"])
-            player_xp["force"] = int(data["xp_force"])
-            player_xp["magic"] = int(data["xp_magic"])
-            player_stats["max_hp"] = int(data["max_hp"])
-            player_stats["max_mana"] = int(data["max_mana"])
-            player_stats["max_fatigue"] = int(data["max_fatigue"])
-            player_stats["force_bonus"] = float(data["force_bonus"])
-            player_stats["magic_bonus"] = float(data["magic_bonus"])
+
+            player_name = data.get("name", "Joueur")
+            money = safe_int(data.get("money"), 0)
+
+            purchased_items[:] = data["purchased_items"].split(";") if data.get("purchased_items") else []
+            fusion_results[:] = data["fusion_results"].split(";") if data.get("fusion_results") else []
+
+            # 🔹 Safe conversions
+            player_xp["global"] = safe_int(data.get("xp_global"), 0)
+            player_xp["force"] = safe_int(data.get("xp_force"), 0)
+            player_xp["magic"] = safe_int(data.get("xp_magic"), 0)
+
+            player_stats["max_hp"] = safe_int(data.get("max_hp"), 100)
+            player_stats["max_mana"] = safe_int(data.get("max_mana"), 100)
+            player_stats["max_fatigue"] = safe_int(data.get("max_fatigue"), 100)
+            player_stats["force_bonus"] = safe_float(data.get("force_bonus"), 1.0)
+            player_stats["magic_bonus"] = safe_float(data.get("magic_bonus"), 1.0)
+
+            # 🔹 Load completed quests if present
+            if "completed_quests" in data:
+                completed_ids = data.get("completed_quests", "").split(";")
+                for q in quests:
+                    if str(q["id"]) in completed_ids:
+                        q["completed"] = True
+
             if 'player_name_label' in globals():
                 player_name_label.config(text=f"{player_name}")
 
@@ -62,7 +139,7 @@ def save_game():
             "name", "money", "purchased_items", "fusion_results",
             "xp_global", "xp_force", "xp_magic",
             "max_hp", "max_mana", "max_fatigue",
-            "force_bonus", "magic_bonus"
+            "force_bonus", "magic_bonus",
         ])
         writer.writerow([
             player_name,
@@ -80,28 +157,11 @@ def save_game():
         ])
 
 # Global variables
-money = 1000
 purchased_items = []
 selected_items = []
 fusion_results = []
 enemy_status_effects = {}
 player_status_effects = {}
-from fusion_recipes_lists import fusion_recipes
-from enemy_types_lists import enemy_types
-
-player_xp = {
-    "global": 0,
-    "force": 0,
-    "magic": 0
-}
-
-player_stats = {
-    "max_hp": 100,
-    "max_mana": 100,
-    "max_fatigue": 100,
-    "force_bonus": 1.0,
-    "magic_bonus": 1.0
-}
 
 itemshop_items = ["Potion de soin", "Potion de poison", "Potion de mana", "Potion de repos", "Bombe l\u00e9g\u00e8re", "Bombe lourde", "Bombe fumig\u00e8ne", "Filet"]
 
@@ -131,8 +191,20 @@ def reset_game():
     }
 
 def inn_rest():
-    player_mana = {"value": 100}
-    player_fatigue = {"value": 0}
+    global money, player_hp, player_mana, player_fatigue
+    if money < 25:
+        messagebox.showwarning("Pas assez d'argent", "Vous n'avez pas assez de deullars pour vous reposer à l'auberge.")
+        return
+
+    answer = messagebox.askyesno("Auberge", "Souhaitez-vous vous reposer à l'auberge pour 25 deullars ?")
+    if answer:
+        money -= 25
+        player_hp["value"] = player_stats["max_hp"]
+        player_mana["value"] = player_stats["max_mana"]
+        player_fatigue["value"] = 0
+        messagebox.showinfo("Repos", "Vous vous sentez reposé ! PV, Mana et Fatigue ont été restaurés.")
+        update_main_window()
+
 
     
 def open_inventaire_window():
@@ -525,7 +597,125 @@ def open_rpg_wip_window():
     wip_window.title("Work in Progress")
     wip_window.geometry("500x500")
 
-    tk.Label(wip_window.window, text="Work In Progress - A venir", font=("Verdana", 16, "bold")).pack(pady=10)
+    tk.Label(wip_window, text="Work In Progress - A venir", font=("Verdana", 16, "bold")).pack(pady=10)
+
+def open_rpg_quests_window():
+    quests_window = tk.Toplevel(window)
+    quests_window.title("📜 Quêtes")
+    quests_window.geometry("800x600")
+    quests_window.configure(bg="#fffaf0")
+
+    tk.Label(quests_window, text="📜 Journal de quêtes", font=("Verdana", 14, "bold"), bg="#fffaf0").pack(pady=10)
+
+    categories = {}
+    for quest in quests:
+        if not quest["completed"]:  # only show unfinished quests
+            cat = quest.get("category", "Divers")
+            if cat not in categories:
+                categories[cat] = []
+            categories[cat].append(quest)
+
+    # Display quests per category
+    for cat, qlist in categories.items():
+        tk.Label(quests_window, text=cat, font=("Verdana", 12, "bold"), bg="#fffaf0").pack(pady=(15, 5), anchor="w", padx=20)
+        for quest in qlist:
+            tk.Button(
+                quests_window,
+                text=quest["title"],
+                font=("Verdana", 11),
+                width=50,
+                anchor="w",
+                command=lambda q=quest: open_quests_dialogue(q)
+            ).pack(pady=2, padx=40, anchor="w")
+
+def complete_quest_choice(quest, choice, window):
+    global money
+
+    # Apply rewards
+    if "reward" in choice:
+        reward = choice["reward"]
+        money += reward.get("money", 0)
+        player_xp["global"] += reward.get("xp", 0)
+
+    # Apply penalties
+    if "penalty" in choice:
+        penalty = choice["penalty"]
+        money -= penalty.get("money", 0)
+        player_xp["global"] -= penalty.get("xp", 0)
+
+    # Mark quest as completed
+    quest["completed"] = True
+
+    # Show dialogues depending on outcome
+    if "result_dialogues" in choice:
+        msg = "\n".join(choice["result_dialogues"])
+    else:
+        # default summary
+        rewards_text = ""
+        if "reward" in choice:
+            rewards_text += f"+{choice['reward'].get('money',0)}💰, +{choice['reward'].get('xp',0)} XP\n"
+        if "penalty" in choice:
+            rewards_text += f"-{choice['penalty'].get('money',0)}💰, -{choice['penalty'].get('xp',0)} XP\n"
+        msg = f"Vous avez choisi : {choice['text']}\n\n{rewards_text.strip()}"
+
+    messagebox.showinfo("📜 Résultat de la quête", msg)
+
+    update_main_window()
+    window.destroy()
+    save_game()  # ensure persistence
+
+
+
+def open_quests_dialogue(quest):
+    dialogue_win = tk.Toplevel(window)
+    dialogue_win.title(quest["title"])
+    dialogue_win.geometry("600x400")
+    dialogue_win.configure(bg="#fffaf0")
+
+    dialogue_label = tk.Label(dialogue_win, text="", font=("Verdana", 12), wraplength=550, bg="#fffaf0", justify="left")
+    dialogue_label.pack(pady=20)
+
+    next_button = tk.Button(dialogue_win, text="➡️ Suivant", font=("Verdana", 11))
+    next_button.pack(pady=10)
+
+    state = {"index": 0}
+
+    def show_next():
+        if state["index"] < len(quest["dialogues"]):
+            dialogue_label.config(text=quest["dialogues"][state["index"]])
+            state["index"] += 1
+        else:
+            # End of dialogues → show choices
+            next_button.destroy()
+            show_choices()
+
+    def show_choices():
+        tk.Label(dialogue_win, text="Que voulez-vous faire ?", font=("Verdana", 12, "bold"), bg="#fffaf0").pack(pady=10)
+
+        has_option = False
+        for choice in quest["choices"]:
+            can_do = False
+            if "skill" in choice["requirement"] and choice["requirement"]["skill"] in fusion_results:
+                can_do = True
+            if "item" in choice["requirement"] and choice["requirement"]["item"] in purchased_items:
+                can_do = True
+
+            if can_do:
+                has_option = True
+                tk.Button(
+                    dialogue_win,
+                    text=choice["text"],
+                    font=("Verdana", 11),
+                    wraplength=500,
+                    command=lambda c=choice, q=quest, w=dialogue_win: complete_quest_choice(q, c, w)
+                ).pack(pady=5, fill="x", padx=20)
+
+        if not has_option:
+            tk.Label(dialogue_win, text="❌ Vous n'avez pas encore les compétences ou objets requis.", font=("Verdana", 10, "italic"), bg="#fffaf0").pack(pady=10)
+
+    next_button.config(command=show_next)
+    show_next()  # show first dialogue
+
 
 def open_rpg_ui_window():
     rpg_window = tk.Toplevel(window)
@@ -538,8 +728,24 @@ def open_rpg_ui_window():
     left_frame = tk.Frame(main_frame)
     left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10)
 
-    right_frame = tk.Frame(main_frame)
-    right_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=10)
+    right_container = tk.Frame(main_frame)
+    right_container.pack(side=tk.RIGHT, fill=tk.Y, padx=10)
+
+    right_canvas = tk.Canvas(right_container)
+    right_scrollbar = tk.Scrollbar(right_container, orient="vertical", command=right_canvas.yview)
+    right_frame = tk.Frame(right_canvas)  # <- keep using right_frame everywhere else
+
+    right_frame.bind(
+        "<Configure>",
+        lambda e: right_canvas.configure(scrollregion=right_canvas.bbox("all"))
+    )
+
+    right_canvas.create_window((0, 0), window=right_frame, anchor="nw")
+    right_canvas.configure(yscrollcommand=right_scrollbar.set)
+
+    right_canvas.pack(side=tk.LEFT, fill="y", expand=True)
+    right_scrollbar.pack(side=tk.RIGHT, fill="y")
+
 
     tk.Label(left_frame, text="⚔️ Combat RPG", font=("Verdana", 16, "bold")).pack(pady=10)
 
@@ -1197,6 +1403,9 @@ def open_milishop_window():
 def open_itemshop_window():
     ShopWindow("Marchand d'objets", ["Potion de soin : 50", "Potion de poison : 50", "Potion de mana : 100", "Potion de repos : 100", "Bombe l\u00e9g\u00e8re : 100", "Bombe lourde : 250", "Bombe fumig\u00e8ne : 100", "Filet : 100"])
 
+
+initialize_save()  # ensures money and stats exist
+
 # Main window
 window = tk.Tk()
 window.title("Project RPG")
@@ -1247,7 +1456,7 @@ frame_bottom_left.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
 
 tk.Label(frame_bottom_left, text="Combat et Quêtes", font=("Verdana", 14, "bold")).pack()
 tk.Button(frame_bottom_left, text="Partir à l'attaque", font=("Verdana", 12), command=open_rpg_ui_window).pack(pady=5)
-tk.Button(frame_bottom_left, text="Quêtes (WIP)", font=("Verdana", 12), command=open_rpg_wip_window).pack(pady=5)
+tk.Button(frame_bottom_left, text="Quêtes", font=("Verdana", 12), command=open_rpg_quests_window).pack(pady=5)
 tk.Button(frame_bottom_left, text="Carte du monde (WIP)", font=("Verdana", 12), command=open_rpg_wip_window).pack(pady=5)
 
 
@@ -1278,5 +1487,4 @@ window.protocol("WM_DELETE_WINDOW", on_close)
 window.mainloop()
 
 window.mainloop()
-
 

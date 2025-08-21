@@ -8,7 +8,7 @@ from fusion_recipes_lists import fusion_recipes
 from enemy_types_lists import enemy_types
 from quests_list import quests
 
-CURRENT_VERSION = "0.1.7"
+CURRENT_VERSION = "0.1.8"
 VERSION_NAME = "Pre-Alpha - Quests update"
 
 SAVE_FILE = "save.csv"
@@ -211,6 +211,9 @@ def open_inventaire_window():
     inventaire_window = tk.Toplevel(window)
     inventaire_window.title("Inventaire")
     inventaire_window.geometry("900x800")
+    inventaire_window.transient(window)
+    inventaire_window.grab_set()
+    inventaire_window.focus_set()
 
     inventaire_window.configure(bg="#fff9ec")
     tk.Label(inventaire_window, text="📖 Fusions Réalisées", font=("Verdana", 14, "bold"), bg="#fff9ec").pack(pady=10)
@@ -498,6 +501,9 @@ def open_skills_creation_window():
     skills_window = tk.Toplevel()
     skills_window.title("Création des compétences")
     skills_window.geometry("900x600")
+    skills_window.transient(window)
+    skills_window.grab_set()
+    skills_window.focus_set()
 
     skills_window.configure(bg="#eef7ff")
     tk.Label(skills_window, text="🔮 Création des compétences", font=("Verdana", 14, "bold"), bg="#eef7ff").pack(pady=20)
@@ -596,6 +602,9 @@ def open_rpg_wip_window():
     wip_window = tk.Toplevel(window)
     wip_window.title("Work in Progress")
     wip_window.geometry("500x500")
+    wip_window.transient(window)
+    wip_window.grab_set()
+    wip_window.focus_set()
 
     tk.Label(wip_window, text="Work In Progress - A venir", font=("Verdana", 16, "bold")).pack(pady=10)
 
@@ -604,6 +613,9 @@ def open_rpg_quests_window():
     quests_window.title("📜 Quêtes")
     quests_window.geometry("800x600")
     quests_window.configure(bg="#fffaf0")
+    quests_window.transient(window)
+    quests_window.grab_set()
+    quests_window.focus_set()
 
     tk.Label(quests_window, text="📜 Journal de quêtes", font=("Verdana", 14, "bold"), bg="#fffaf0").pack(pady=10)
 
@@ -671,6 +683,9 @@ def open_quests_dialogue(quest):
     dialogue_win.title(quest["title"])
     dialogue_win.geometry("600x400")
     dialogue_win.configure(bg="#fffaf0")
+    dialogue_win.transient(window)
+    dialogue_win.grab_set()
+    dialogue_win.focus_set()
 
     dialogue_label = tk.Label(dialogue_win, text="", font=("Verdana", 12), wraplength=550, bg="#fffaf0", justify="left")
     dialogue_label.pack(pady=20)
@@ -721,6 +736,9 @@ def open_rpg_ui_window():
     rpg_window = tk.Toplevel(window)
     rpg_window.title("RPG Combat")
     rpg_window.geometry("1200x900")
+    rpg_window.transient(window)
+    rpg_window.grab_set()
+    rpg_window.focus_set()
 
     main_frame = tk.Frame(rpg_window)
     main_frame.pack(fill=tk.BOTH, expand=True)
@@ -949,6 +967,15 @@ def open_rpg_ui_window():
 
 
     def enemy_attack():
+        def check_player_defeat(fight_window):
+            global player_hp
+            if player_hp <= 0:
+                player_hp = 0
+                messagebox.showinfo("💀 Défaite", "Vous vous évanouissez au milieu du donjon...")
+                fight_window.destroy()
+                return True
+            return False
+
         # gestion effets
         if "dodge" in player_status_effects:
             if player_status_effects["dodge"]["duration"] > 0:
@@ -1017,6 +1044,9 @@ def open_rpg_ui_window():
         show_floating_text(rpg_window, damage, "red")
         if player_hp["value"] <= 0:
             log_message(f"💀 Vous avez été vaincu.")
+            if check_player_defeat(rpg_window):
+                return
+
 
     def use_skill(skill_data):
         disable_all_actions()
@@ -1336,6 +1366,9 @@ def open_upgrade_window():
     upgrade_window.title("📈 Améliorations")
     upgrade_window.geometry("420x500")
     upgrade_window.configure(bg="#f1f1f1")
+    upgrade_window.transient(window)
+    upgrade_window.grab_set()
+    upgrade_window.focus_set()
 
     tk.Label(upgrade_window, text="📈 Améliorations de personnage", font=("Verdana", 14, "bold"), bg="#f1f1f1").pack(pady=10)
 

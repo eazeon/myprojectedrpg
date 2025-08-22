@@ -48,6 +48,7 @@ player_stats = {
     "magic_bonus": 1.0
 }
 
+player_current_hp = player_stats["max_hp"]
 
 def initialize_save():
     global money, purchased_items, fusion_results, player_xp, player_stats, player_name
@@ -86,6 +87,8 @@ def initialize_save():
             player_stats["force_bonus"] = 1.0
             player_stats["magic_bonus"] = 1.0
         
+        player_current_hp = player_stats["max_hp"]
+        
         # Créer un fichier de sauvegarde vide avec les valeurs par défaut
         with open(SAVE_FILE, mode="w", newline='', encoding="utf-8") as file:
             writer = csv.writer(file)
@@ -120,6 +123,8 @@ def initialize_save():
             player_stats["max_fatigue"] = safe_int(data.get("max_fatigue"), 100)
             player_stats["force_bonus"] = safe_float(data.get("force_bonus"), 1.0)
             player_stats["magic_bonus"] = safe_float(data.get("magic_bonus"), 1.0)
+
+            player_current_hp = player_stats["max_hp"]
 
             # 🔹 Load completed quests if present
             if "completed_quests" in data:
@@ -968,9 +973,9 @@ def open_rpg_ui_window():
 
     def enemy_attack():
         def check_player_defeat(fight_window):
-            global player_hp
-            if player_hp <= 0:
-                player_hp = 0
+            global player_current_hp
+            if player_current_hp <= 0:
+                player_current_hp = 0
                 messagebox.showinfo("💀 Défaite", "Vous vous évanouissez au milieu du donjon...")
                 fight_window.destroy()
                 return True
@@ -1037,15 +1042,11 @@ def open_rpg_ui_window():
             update_status_display()
             return
 
-
-        player_hp["value"] -= damage
-
         log_message(f"⚠️ {current_enemy['name']} vous inflige {damage} de dégâts.")
         show_floating_text(rpg_window, damage, "red")
-        if player_hp["value"] <= 0:
-            log_message(f"💀 Vous avez été vaincu.")
-            if check_player_defeat(rpg_window):
-                return
+        player_current_hp -= damage
+        if check_player_defeat(open_rpg_ui_window):
+            return
 
 
     def use_skill(skill_data):
@@ -1217,7 +1218,7 @@ def open_rpg_ui_window():
                 if etype == "heal":
                     heal_value = eff.get("value", 0)
                     if tgt == "self":
-                        player_hp["value"] = min(player_stats["max_hp"], player_hp["value"] + heal_value)
+                        player_current_hp = min(player_current_hp + heal_value, player_stats["max_hp"])
                         log_message(f"🧪 Vous récupérez {heal_value} PV.")
                     else:
                         enemy_hp["value"] = min(current_enemy.get("hp", 100), enemy_hp["value"] + heal_value)

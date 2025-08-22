@@ -13,7 +13,7 @@ quests = [
         "choices": [
             {
                 "requirement": {"skill": "Boule de feu simple"},
-                "text": "🕯️ Brûler le champ pour créer de la cendre comme engrais",
+                "text": "🕯️ Utiliser 'boule de feu' : Brûler le champ pour créer de la cendre comme engrais",
                 "penalty": {"money": 200},
                 "result_dialogues": [
                     "Villageois : ... C'était quoi l'idée derrière ? 'Faire de la cendre à utiliser comme engrais' ? D'accord, quand vous aurez deux minutes vous m'expliquerez sur quels plants je peux mettre cet engrais.",
@@ -22,7 +22,7 @@ quests = [
             },
             {
                 "requirement": {"skill": "Colonne de flamme"},
-                "text": "🔥 Incinérer tout le champ et la terre présente afin de rendre le sol moins acide et le stériliser des maladies",
+                "text": "🔥 Utiliser 'Colonne de flammes' : Incinérer tout le champ et la terre présente afin de rendre le sol moins acide et le stériliser des maladies",
                 "penalty": {"money": 350},
                 "result_dialogues": [
                     "Villageois : ... C'était quoi l'idée derrière ? 'Rendre le sol moins acide et le stériliser des maladies' ? D'accord, je me rappelle pas vous avoir demandé un cours sur la gestion d'un terrain je crois m'y connaître un peu, surtout que vous avez oublié mais ici c'est des pommes de terre qui ont besoin de potassium, hors le potassium se volatilise a plus de 700° : donc y en a plus dans le sol.",
@@ -31,7 +31,7 @@ quests = [
             },
             {
                 "requirement": {"skill": "Jet d'eau"},
-                "text": "💧 Arroser le champ avec de l'eau magique",
+                "text": "💧 Utiliser 'Jet d'eau' : Arroser le champ avec de l'eau magique",
                 "reward": {"money": 100, "xp": 30},
                 "result_dialogues": [
                     "Villageois : Ah, il fallait juste les arroser d'accord! Merci à vous, tenez prenez un peu d'argent en récompense !"

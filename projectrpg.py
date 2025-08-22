@@ -8,7 +8,7 @@ from fusion_recipes_lists import fusion_recipes
 from enemy_types_lists import enemy_types
 from quests_list import quests
 
-CURRENT_VERSION = "0.1.8"
+CURRENT_VERSION = "0.1.9"
 VERSION_NAME = "Pre-Alpha - Quests update"
 
 SAVE_FILE = "save.csv"
@@ -48,8 +48,6 @@ player_stats = {
     "magic_bonus": 1.0
 }
 
-player_current_hp = player_stats["max_hp"]
-
 def initialize_save():
     global money, purchased_items, fusion_results, player_xp, player_stats, player_name
 
@@ -87,7 +85,6 @@ def initialize_save():
             player_stats["force_bonus"] = 1.0
             player_stats["magic_bonus"] = 1.0
         
-        player_current_hp = player_stats["max_hp"]
         
         # Créer un fichier de sauvegarde vide avec les valeurs par défaut
         with open(SAVE_FILE, mode="w", newline='', encoding="utf-8") as file:
@@ -124,7 +121,6 @@ def initialize_save():
             player_stats["force_bonus"] = safe_float(data.get("force_bonus"), 1.0)
             player_stats["magic_bonus"] = safe_float(data.get("magic_bonus"), 1.0)
 
-            player_current_hp = player_stats["max_hp"]
 
             # 🔹 Load completed quests if present
             if "completed_quests" in data:
@@ -648,26 +644,20 @@ def open_rpg_quests_window():
 def complete_quest_choice(quest, choice, window):
     global money
 
-    # Apply rewards
     if "reward" in choice:
         reward = choice["reward"]
         money += reward.get("money", 0)
         player_xp["global"] += reward.get("xp", 0)
-
-    # Apply penalties
     if "penalty" in choice:
         penalty = choice["penalty"]
         money -= penalty.get("money", 0)
         player_xp["global"] -= penalty.get("xp", 0)
 
-    # Mark quest as completed
     quest["completed"] = True
 
-    # Show dialogues depending on outcome
     if "result_dialogues" in choice:
         msg = "\n".join(choice["result_dialogues"])
     else:
-        # default summary
         rewards_text = ""
         if "reward" in choice:
             rewards_text += f"+{choice['reward'].get('money',0)}💰, +{choice['reward'].get('xp',0)} XP\n"
@@ -679,8 +669,12 @@ def complete_quest_choice(quest, choice, window):
 
     update_main_window()
     window.destroy()
-    save_game()  # ensure persistence
-
+    save_game()
+    for w in window.master.winfo_children():
+        if isinstance(w, tk.Toplevel) and w.title() == "📜 Quêtes":
+            w.destroy()
+            open_rpg_quests_window()
+            break
 
 
 def open_quests_dialogue(quest):
@@ -973,13 +967,13 @@ def open_rpg_ui_window():
 
     def enemy_attack():
         def check_player_defeat(fight_window):
-            global player_current_hp
-            if player_current_hp <= 0:
-                player_current_hp = 0
+            if player_hp["value"] <= 0:
+                player_hp["value"] = 0
                 messagebox.showinfo("💀 Défaite", "Vous vous évanouissez au milieu du donjon...")
                 fight_window.destroy()
                 return True
             return False
+
 
         # gestion effets
         if "dodge" in player_status_effects:
@@ -1044,10 +1038,11 @@ def open_rpg_ui_window():
 
         log_message(f"⚠️ {current_enemy['name']} vous inflige {damage} de dégâts.")
         show_floating_text(rpg_window, damage, "red")
-        player_current_hp -= damage
-        if check_player_defeat(open_rpg_ui_window):
+        player_hp["value"] -= damage
+        if check_player_defeat(rpg_window):
             return
-
+        update_bars()
+        update_status_display()
 
     def use_skill(skill_data):
         disable_all_actions()
@@ -1218,7 +1213,7 @@ def open_rpg_ui_window():
                 if etype == "heal":
                     heal_value = eff.get("value", 0)
                     if tgt == "self":
-                        player_current_hp = min(player_current_hp + heal_value, player_stats["max_hp"])
+                        player_hp["value"] = min( player_hp["value"] + heal_value, player_stats["max_hp"])
                         log_message(f"🧪 Vous récupérez {heal_value} PV.")
                     else:
                         enemy_hp["value"] = min(current_enemy.get("hp", 100), enemy_hp["value"] + heal_value)

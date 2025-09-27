@@ -8,7 +8,7 @@ from fusion_recipes_lists import fusion_recipes
 from enemy_types_lists import enemy_types
 from quests_list import quests
 
-CURRENT_VERSION = "0.1.9"
+CURRENT_VERSION = "0.2.1"
 VERSION_NAME = "Pre-Alpha - Quests update"
 
 SAVE_FILE = "save.csv"
@@ -33,6 +33,7 @@ selected_items = []
 fusion_results = []
 enemy_status_effects = {}
 player_status_effects = {}
+last_combat_result = {"lost": False}
 
 player_xp = {
     "global": 0,
@@ -47,6 +48,7 @@ player_stats = {
     "force_bonus": 1.0,
     "magic_bonus": 1.0
 }
+
 
 def initialize_save():
     global money, purchased_items, fusion_results, player_xp, player_stats, player_name
@@ -66,9 +68,9 @@ def initialize_save():
             player_xp["force"] = 10000
             player_xp["magic"] = 10000
 
-            player_stats["max_hp"] = 1000
-            player_stats["max_mana"] = 1000
-            player_stats["max_fatigue"] = 1000
+            player_stats["max_hp"] = 250
+            player_stats["max_mana"] = 250
+            player_stats["max_fatigue"] = 250
             player_stats["force_bonus"] = 1.0
             player_stats["magic_bonus"] = 1.0
 
@@ -192,19 +194,24 @@ def reset_game():
     }
 
 def inn_rest():
-    global money, player_hp, player_mana, player_fatigue
-    if money < 25:
-        messagebox.showwarning("Pas assez d'argent", "Vous n'avez pas assez de deullars pour vous reposer à l'auberge.")
-        return
+    global money, last_combat_result
+    INN_COST = 50  # or whatever you already use
 
-    answer = messagebox.askyesno("Auberge", "Souhaitez-vous vous reposer à l'auberge pour 25 deullars ?")
-    if answer:
-        money -= 25
-        player_hp["value"] = player_stats["max_hp"]
-        player_mana["value"] = player_stats["max_mana"]
-        player_fatigue["value"] = 0
-        messagebox.showinfo("Repos", "Vous vous sentez reposé ! PV, Mana et Fatigue ont été restaurés.")
+    if money >= INN_COST:
+        money -= INN_COST
+
+        # ✅ Full restore
+        player_stats["current_hp"] = player_stats["max_hp"]
+        player_stats["current_mana"] = player_stats["max_mana"]
+        player_stats["current_fatigue"] = 0
+
+        # ✅ Clear penalty from last defeat
+        last_combat_result["lost"] = False
+
+        messagebox.showinfo("Repos", "Vous vous reposez à l'auberge.\n💤 Vous êtes totalement rétabli !")
         update_main_window()
+    else:
+        messagebox.showwarning("Pas assez d'argent", "Vous n'avez pas assez d'argent pour vous reposer.")
 
 
     
@@ -713,6 +720,8 @@ def open_quests_dialogue(quest):
                 can_do = True
             if "item" in choice["requirement"] and choice["requirement"]["item"] in purchased_items:
                 can_do = True
+            if "none" in choice["requirement"]:
+                can_do = True
 
             if can_do:
                 has_option = True
@@ -732,6 +741,8 @@ def open_quests_dialogue(quest):
 
 
 def open_rpg_ui_window():
+    global last_combat_result
+
     rpg_window = tk.Toplevel(window)
     rpg_window.title("RPG Combat")
     rpg_window.geometry("1200x900")
@@ -778,8 +789,31 @@ def open_rpg_ui_window():
     player_status_text = None
     enemy_status_text = None
 
+    # Close handler: mark combat as lost so next fight starts penalized
+    def on_combat_close():
+        if messagebox.askyesno("Quitter le combat",
+                           "⚠️ Êtes-vous sûr de vouloir fuir ?\n"
+                           "Vous perdrez automatiquement ce combat."):
+            last_combat_result["lost"] = True
+            messagebox.showinfo("Défaite", "Vous avez fui le combat et perdu la bataille...")
+            rpg_window.destroy()
+
+    rpg_window.protocol("WM_DELETE_WINDOW", on_combat_close)
+
+    # Determine starting values (apply penalty if last combat was lost / escaped)
+    if last_combat_result.get("lost", False):
+        start_hp = max(1, int(player_stats["max_hp"] * 0.25))
+        start_mana = max(0, int(player_stats["max_mana"] * 0.25))
+        start_fatigue = int(player_stats["max_fatigue"] * 0.8)
+        last_combat_result["lost"] = False
+    else:
+        start_hp = player_stats["max_hp"]
+        start_mana = player_stats["max_mana"]
+        start_fatigue = 0
 
     def update_status_display():
+        if not rpg_window.winfo_exists():
+            return
         def format_status(status_dict):
             if not status_dict:
                 return "Aucun"
@@ -803,8 +837,12 @@ def open_rpg_ui_window():
                 else:
                     lines.append(f"❓ {effect} ({dur} tours)")
             return "\n".join(lines)
-        player_status_text.config(text=format_status(player_status_effects))
-        enemy_status_text.config(text=format_status(enemy_status_effects))
+
+        if player_status_text.winfo_exists():
+            player_status_text.config(text=format_status(player_status_effects))
+        if enemy_status_text.winfo_exists():
+            enemy_status_text.config(text=format_status(enemy_status_effects))
+
 
     status_frame = tk.Frame(left_frame)
     status_frame.pack(pady=5)
@@ -868,7 +906,7 @@ def open_rpg_ui_window():
             if "damage_per_turn" in data:
                 enemy_hp["value"] -= data["damage_per_turn"]
                 log_message(f"🔥 {current_enemy['name']} subit {data['damage_per_turn']} dégâts de {effect}.")
-                show_floating_text(rpg_window, data["damage_per_turn"], "orange")
+                show_floating_text(rpg_window, data['damage_per_turn'], "orange")
         
             data["duration"] -= 1
             if data["duration"] <= 0:
@@ -879,20 +917,22 @@ def open_rpg_ui_window():
 
 
     def start_next_fight():
+        # check victory condition
         if fight_counter["count"] >= 5:
-            log_message("🎉 Vous avez remporté les 5 combats !")
+            messagebox.showinfo("Victoire !", "🎉 Vous avez vaincu 5 monstres et réussi à vous échapper du donjon !")
+            rpg_window.destroy()
             return
-        if fight_counter["count"] == 0:
-            fight_counter["count"] += 1
-        else:
-            fight_counter["count"] += 1
+
+        # increment the counter once and grant XP for subsequent fights
+        fight_counter["count"] += 1
+        if fight_counter["count"] > 1:
             xp_gain = 50
             player_xp["global"] += xp_gain
             log_message(f"🏆 Vous gagnez {xp_gain} points d'expérience globale !")
 
         enemy_type = random.choices(enemy_types, weights=[e['weight'] for e in enemy_types])[0]
         current_enemy.update(enemy_type)
-        enemy_hp["value"] = enemy_type["hp"]
+        enemy_hp["value"] = enemy_type.get("hp", 100)
         enemy_status_effects.clear()
 
         update_bars()
@@ -900,48 +940,63 @@ def open_rpg_ui_window():
         log_message(f"⚔️ Combat {fight_counter['count']} commencé contre {current_enemy['name']} !")
         update_skills_display()
 
-    def create_bar(label_text, color):
+    def create_bar(label_text, color, max_value=100):
         container = tk.Frame(bars_frame)
         container.pack(pady=5)
         label = tk.Label(container, text=label_text, font=("Verdana", 10))
         label.pack(side=tk.LEFT, padx=5)
-        canvas = tk.Canvas(container, width=200, height=20, bg="grey")
+        width = max(200, int(max_value * 2))
+        canvas = tk.Canvas(container, width=width, height=20, bg="grey")
         canvas.pack(side=tk.LEFT)
-        bar = canvas.create_rectangle(0, 0, 200, 20, fill=color)
-        value_label = tk.Label(container, text="100/100", font=("Verdana", 10))
+        bar = canvas.create_rectangle(0, 0, width, 20, fill=color)
+        value_label = tk.Label(container, text=f"{max_value}/{max_value}", font=("Verdana", 10))
         value_label.pack(side=tk.LEFT, padx=5)
-        return canvas, bar, value_label
+        return canvas, bar, value_label, width
 
-    player_hp_canvas, player_hp_bar, player_hp_label = create_bar("Santé joueur", "green")
-    enemy_hp_canvas, enemy_hp_bar, enemy_hp_label = create_bar("Santé ennemi", "red")
-    mana_canvas, mana_bar, mana_label = create_bar("Mana joueur", "blue")
-    fatigue_canvas, fatigue_bar, fatigue_label = create_bar("Fatigue joueur", "orange")
+
+    # initialize player/enemy values from computed starts (do NOT overwrite later)
+    fight_counter = {"count": 0}
+    player_hp = {"value": start_hp}
+    player_mana = {"value": start_mana}
+    player_fatigue = {"value": start_fatigue}
+    enemy_hp = {"value": 0}
+    current_enemy = {"name": "", "resistances": {}, "damage_range": (5, 15), "hp": 100}
+
+    # create bars AFTER start values to get widths using max stats
+    player_hp_canvas, player_hp_bar, player_hp_label, player_hp_width = create_bar("Santé joueur", "green", player_stats["max_hp"])
+    enemy_hp_canvas, enemy_hp_bar, enemy_hp_label, enemy_hp_width = create_bar("Santé ennemi", "red", 100)
+    mana_canvas, mana_bar, mana_label, mana_width = create_bar("Mana joueur", "blue", player_stats["max_mana"])
+    fatigue_canvas, fatigue_bar, fatigue_label, fatigue_width = create_bar("Fatigue joueur", "orange", player_stats["max_fatigue"])
+
 
     log_text = tk.Text(left_frame, height=15, width=60, state=tk.DISABLED)
     log_text.pack(pady=10)
 
-    fight_counter = {"count": 0}
-    player_hp = {"value": 100}
-    player_mana = {"value": 100}
-    player_fatigue = {"value": 0}
-    enemy_hp = {"value": 100}
-    current_enemy = {"name": "", "resistances": {}, "damage_range": (5, 15)}
+    def check_player_defeat(fight_window):
+        if player_hp["value"] <= 0:
+            player_hp["value"] = 0
+            last_combat_result["lost"] = True
+            messagebox.showinfo("💀 Défaite", "Vous vous évanouissez au milieu du donjon...")
+            fight_window.destroy()
+            return True
+        return False
 
     def update_bars():
-        def set_bar(canvas, bar, label, value, max_value):
-            percent = max(min(value / max_value, 1), 0)
-            canvas.coords(bar, 0, 0, 200 * percent, 20)
+        def set_bar(canvas, bar, label, value, max_value, width):
+            percent = max(min(value / max_value, 1), 0) if max_value > 0 else 0
+            canvas.coords(bar, 0, 0, width * percent, 20)
             label.config(text=f"{value}/{max_value}")
         set_bar(player_hp_canvas, player_hp_bar, player_hp_label,
-                player_hp["value"], player_stats["max_hp"])
+                player_hp["value"], player_stats["max_hp"], player_hp_width)
         set_bar(enemy_hp_canvas, enemy_hp_bar, enemy_hp_label,
-                enemy_hp["value"], current_enemy.get("hp", 100))
+                enemy_hp["value"], current_enemy.get("hp", 100), enemy_hp_width)
         set_bar(mana_canvas, mana_bar, mana_label,
-                player_mana["value"], player_stats["max_mana"])
+                player_mana["value"], player_stats["max_mana"], mana_width)
         set_bar(fatigue_canvas, fatigue_bar, fatigue_label,
-                player_fatigue["value"], player_stats["max_fatigue"])
+                player_fatigue["value"], player_stats["max_fatigue"], fatigue_width)
 
         update_item_display()
+
 
     def log_message(message, flash=False):
         log_text.config(state=tk.NORMAL)
@@ -966,15 +1021,7 @@ def open_rpg_ui_window():
 
 
     def enemy_attack():
-        def check_player_defeat(fight_window):
-            if player_hp["value"] <= 0:
-                player_hp["value"] = 0
-                messagebox.showinfo("💀 Défaite", "Vous vous évanouissez au milieu du donjon...")
-                fight_window.destroy()
-                return True
-            return False
-
-
+        # use the outer check_player_defeat so losses are recorded
         # gestion effets
         if "dodge" in player_status_effects:
             if player_status_effects["dodge"]["duration"] > 0:
@@ -1002,7 +1049,6 @@ def open_rpg_ui_window():
                 acc["duration"] -= 1
                 if acc["duration"] <= 0:
                     del enemy_status_effects["accuracy_down"]
-
 
         process_status_effects()
         if enemy_hp["value"] <= 0:
@@ -1055,6 +1101,10 @@ def open_rpg_ui_window():
         modifier = 1.0
         element = skill_data["element"]
         damage_type = skill_data["damage_type"]
+        if element == "water" and "burn" in enemy_status_effects:
+            del enemy_status_effects["burn"]
+            log_message(f"💧 L'eau éteint les flammes de {current_enemy['name']} !")
+
 
         # Effets
         if "effect" in skill_data:
@@ -1304,6 +1354,30 @@ def open_rpg_ui_window():
                 log_message("🧪 Vous buvez une potion de repos et récupérez 50 de fatigue.")
             else:
                 log_message(f"🤷 Vous jetez une potion de repos sur {current_enemy['name']}. Aucun effet.")
+        elif item == "Bombe légère":
+            if target == "enemy":
+                enemy_hp["value"] -= 30
+                log_message(f"💣 Vous lancez une bombe légère sur {current_enemy['name']} ! Il subit 30 dégâts.")
+            else:
+                log_message("🤷 Vous vous jetez une bombe légère dessus... Mauvaise idée !")
+                player_hp["value"] -= 30
+        elif item == "Bombe lourde":
+            if target == "enemy":
+                enemy_hp["value"] -= 50
+                log_message(f"💥 Vous lancez une bombe lourde sur {current_enemy['name']} ! Il subit 50 dégâts.")
+                if random.random() < 0.3:
+                    enemy_status_effects["stun"] = {"duration": 1}
+                    log_message(f"😵 {current_enemy['name']} est étourdi par l'explosion !")
+            else:
+                log_message("🤯 Vous vous explosez avec une bombe lourde ! Vous subissez 50 dégâts.")
+                player_hp["value"] -= 50
+        elif item == "Filet":
+            if target == "enemy":
+                enemy_status_effects["stun"] = {"duration": 2}
+                log_message(f"🕸️ Vous piégez {current_enemy['name']} dans un filet ! Il ne pourra pas attaquer pendant 2 tours.")
+            else:
+                log_message("🤦 Vous vous empêtrer dans votre propre filet. Vous perdez un tour.")
+                player_status_effects["stun"] = {"duration": 1}
         else:
             log_message(f"❓ {item} n'a pas encore d'effet implémenté.")
 
@@ -1328,8 +1402,6 @@ def open_rpg_ui_window():
 
         def continue_after_delay():
             global money
-            player_mana["value"] -= 10
-            player_fatigue["value"] += 15
             if enemy_hp["value"] <= 0:
                 log_message(f"✅ {current_enemy['name']} vaincu !")
                 reward = current_enemy.get("bounty", 0)
@@ -1355,6 +1427,7 @@ def open_rpg_ui_window():
     tk.Label(right_frame, text="Objets disponibles", font=("Verdana", 12, "bold")).pack(pady=5)
     update_item_display()
 
+    # start the first fight (will use start_hp/start_mana/start_fatigue)
     start_next_fight()
 
 def open_upgrade_window():
@@ -1448,7 +1521,11 @@ main_label.pack(pady=15)
 player_name_label = tk.Label(window, text="", font=("Verdana", 10), anchor="e", justify="right")
 player_name_label.place(relx=1.0, x=-10, y=10, anchor="ne")
 
-# Labels d'information
+# Label de version
+version_label = tk.Label(window, text=f"Version : {CURRENT_VERSION}", font=("Verdana", 9), fg="grey")
+version_label.pack(side=tk.BOTTOM, pady=5)
+
+# Labels d'argent
 main_money_label = tk.Label(window, text=f"💰 Argent : {money} deullars", font=("Verdana", 12))
 main_money_label.pack(pady=5)
 
@@ -1464,19 +1541,19 @@ frame_top_left = styled_frame(buttons_frame, "#f9f1e7")
 frame_top_left.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
 
 tk.Label(frame_top_left, text="Marchands", font=("Verdana", 14, "bold")).pack()
-tk.Button(frame_top_left, text="Entraîneur militaire", font=("Verdana", 12), command=open_military_window).pack(pady=5)
-tk.Button(frame_top_left, text="Marchand militaire", font=("Verdana", 12), command=open_milishop_window).pack(pady=5)
-tk.Button(frame_top_left, text="Maître magicien", font=("Verdana", 12), command=open_magic_window).pack(pady=5)
-tk.Button(frame_top_left, text="Marchand d'objets", font=("Verdana", 12), command=open_itemshop_window).pack(pady=5)
+tk.Button(frame_top_left, text="Entraîneur militaire", font=("Verdana", 12), bg="salmon", fg="black", command=open_military_window).pack(pady=5)
+tk.Button(frame_top_left, text="Marchand militaire", font=("Verdana", 12), bg="salmon", fg="black", command=open_milishop_window).pack(pady=5)
+tk.Button(frame_top_left, text="Maître magicien", font=("Verdana", 12), bg="salmon", fg="black", command=open_magic_window).pack(pady=5)
+tk.Button(frame_top_left, text="Marchand d'objets", font=("Verdana", 12), bg="salmon", fg="black", command=open_itemshop_window).pack(pady=5)
 
 # ----- Catégorie 2 : Joueur -----
 frame_top_right = styled_frame(buttons_frame, "#eef5fc")
 frame_top_right.grid(row=0, column=1, padx=20, pady=20, sticky="nsew")
 
 tk.Label(frame_top_right, text="Joueur", font=("Verdana", 14, "bold")).pack()
-tk.Button(frame_top_right, text="Fusion !", font=("Verdana", 12), command=open_skills_creation_window).pack(pady=5)
-tk.Button(frame_top_right, text="Inventaire", font=("Verdana", 12), command=open_inventaire_window).pack(pady=5)
-tk.Button(frame_top_right, text="Améliorer les stats", font=("Verdana", 12), command=open_upgrade_window).pack(pady=5)
+tk.Button(frame_top_right, text="Fusion !", font=("Verdana", 12), bg="purple", fg="white", command=open_skills_creation_window).pack(pady=5)
+tk.Button(frame_top_right, text="Inventaire", font=("Verdana", 12), bg="brown", fg="black", command=open_inventaire_window).pack(pady=5)
+tk.Button(frame_top_right, text="Améliorer les stats", font=("Verdana", 12), bg="lightblue", fg="black", command=open_upgrade_window).pack(pady=5)
 tk.Button(frame_top_right, text="Se reposer à l'auberge", font=("Verdana", 12), command=inn_rest).pack(pady=5)
 
 # ----- Catégorie 3 : Combat et Quêtes -----
@@ -1484,8 +1561,8 @@ frame_bottom_left = styled_frame(buttons_frame, "#f3f7e9")
 frame_bottom_left.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
 
 tk.Label(frame_bottom_left, text="Combat et Quêtes", font=("Verdana", 14, "bold")).pack()
-tk.Button(frame_bottom_left, text="Partir à l'attaque", font=("Verdana", 12), command=open_rpg_ui_window).pack(pady=5)
-tk.Button(frame_bottom_left, text="Quêtes", font=("Verdana", 12), command=open_rpg_quests_window).pack(pady=5)
+tk.Button(frame_bottom_left, text="Partir à l'attaque", font=("Verdana", 12), bg="orange", fg="black", command=open_rpg_ui_window).pack(pady=5)
+tk.Button(frame_bottom_left, text="Quêtes", font=("Verdana", 12), bg="blue", fg="white", command=open_rpg_quests_window).pack(pady=5)
 tk.Button(frame_bottom_left, text="Carte du monde (WIP)", font=("Verdana", 12), command=open_rpg_wip_window).pack(pady=5)
 
 

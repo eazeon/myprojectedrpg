@@ -27,6 +27,7 @@ Une fois paré au combat vous n'avez plus qu'a cliquer sur "Partir à l'attaque"
 Chaque ennemi est vulnérable à un type de dégâts (contondant, perçant, coupant, magique) et peut être résistant a un type de dégât en particulier.
 Battre un ennemi vous octroie des pièces et de l'XP globale.
 Utiliser une compétence physique vous octroie de l'XP de force et une compétence magique vous octroie de l'XP magique.
+Une fois les 5 ennemis battus, la fenêtre se ferme. Si vous êtes battus ou si vous quittez le combat (en fermant la fenêtre de combat), vous devrez d'abord vous reposer à l'auberge avant de repartir au combat sinon vous entrez au combat avec un malus de vie/mana/fatigue.
 Vous pouvez ensuite améliorer vos stats en cliquant sur le bouton assez explicite "Améliorer vos stats" où vous pourrez échanger de l'XP globale contre de la santé, de l'XP de force contre + de fatigue max ou un boost de dégâts de force, et de l'XP magique pour améliorer votre mana max ou un boost de dégâts en magie.
 
 Vous pouvez aussi désormais accéder à certaines quêtes (deux pour le moment) grâce au bouton des quêtes!

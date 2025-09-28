@@ -195,7 +195,7 @@ def reset_game():
 
 def inn_rest():
     global money, last_combat_result
-    INN_COST = 50  # or whatever you already use
+    INN_COST = 25  # or whatever you already use
 
     if money >= INN_COST:
         money -= INN_COST
@@ -606,15 +606,38 @@ def open_skills_creation_window():
     )
     fusion_button.pack(pady=5)
 
-def open_rpg_wip_window():
-    wip_window = tk.Toplevel(window)
-    wip_window.title("Work in Progress")
-    wip_window.geometry("500x500")
-    wip_window.transient(window)
-    wip_window.grab_set()
-    wip_window.focus_set()
+def open_rpg_ui_map_window():
+    map_window = tk.Toplevel(window)
+    map_window.title("Carte du monde")
+    map_window.geometry("900x700")
+    map_window.configure(bg="#fffaf0")
+    map_window.transient(window)
+    map_window.grab_set()
+    map_window.focus_set()
 
-    tk.Label(wip_window, text="Work In Progress - A venir", font=("Verdana", 16, "bold")).pack(pady=10)
+    tk.Label(map_window, text="🗺️ Carte du monde", font=("Verdana", 14, "bold"), bg="#fffaf0").pack(pady=10)
+
+    canvas = tk.Canvas(map_window, width=800, height=500, bg="#e0d8c3", highlightthickness=0)
+    canvas.pack(pady=10)
+
+    canvas.create_rectangle(0, 0, 800, 500, fill="#c2e0ff")
+    canvas.create_oval(100, 100, 300, 300, fill="#9be58c")
+
+    locations = [
+        {"name": "Village d'Audébu'", "x": 200, "y": 200},
+        {"name": "Forêt mystique", "x": 400, "y": 150},
+        {"name": "Votre campement", "x": 450, "y": 200},
+        {"name": "Donjon ancien", "x": 600, "y": 300},
+    ]
+
+    def go_to_location(location):
+        messagebox.showinfo("Voyage", f"Vous voyagez vers {location['name']} !")
+
+    for loc in locations:
+        btn = tk.Button(canvas, text=loc["name"], bg="white", command=lambda l=loc: go_to_location(l))
+        canvas.create_window(loc["x"], loc["y"], window=btn)
+
+    tk.Button(map_window, text="Fermer la carte", font=("Verdana", 12), command=map_window.destroy).pack(pady=10)
 
 def open_rpg_quests_window():
     quests_window = tk.Toplevel(window)
@@ -1563,7 +1586,7 @@ frame_bottom_left.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
 tk.Label(frame_bottom_left, text="Combat et Quêtes", font=("Verdana", 14, "bold")).pack()
 tk.Button(frame_bottom_left, text="Partir à l'attaque", font=("Verdana", 12), bg="orange", fg="black", command=open_rpg_ui_window).pack(pady=5)
 tk.Button(frame_bottom_left, text="Quêtes", font=("Verdana", 12), bg="blue", fg="white", command=open_rpg_quests_window).pack(pady=5)
-tk.Button(frame_bottom_left, text="Carte du monde (WIP)", font=("Verdana", 12), command=open_rpg_wip_window).pack(pady=5)
+tk.Button(frame_bottom_left, text="Carte du monde (WIP)", font=("Verdana", 12), command=open_rpg_ui_map_window).pack(pady=5)
 
 
 # ----- Catégorie 4 : Options -----

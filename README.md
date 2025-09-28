@@ -17,6 +17,7 @@ Note sur l'IA : Oui j'ai utilisé l'IA pour générer du code, via ChatGPT. Je m
 # Manuel de jeu
 Le but de ce jeu tourne autour de la mécanique de fusion.
 Vous pouvez acheter des techniques de combat, des armes, des formes de magie et des objets. Ensuite libre à vous de choisir comment fusionner ces éléments.
+Voyez ce jeu comme un FTL : les actions vous sont décrites a l'écrit, a vous d'utiliser votre imagination pour visualiser ce qu'il se passe et façonner votre personnage !
 
 Exemple : fusionner la compétence "Coup simple" et "Magie élémentaire de feu" vous donne la compétence "Boule de feu simple".
 Je vous laisse découvrir les différentes fusions et vous amuser avec ;)

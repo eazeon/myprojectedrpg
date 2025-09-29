@@ -38,3 +38,23 @@ Vous pouvez aussi désormais accéder à certaines quêtes (deux pour le moment)
 
 # Problèmes connus
 - Lorsque l'on chercher à fusionner des objets il est possible que la mécanique de fusion rencontre quelques problèmes : fermer et rouvrir la fenêtre devrait permettre de nouveau de fusionner sans soucis
+- Il est possible d'être bloqué avec une ardoise insuffisante pour se reposer a l'auberge -> prochain patch
+
+# Prochain patch
+- Map update
+- Fight UI update
+- Skill desc update
+- Not enough money to go fight : side job to add
+
+# Roadmap
+- ~~Fusion skill~~
+- ~~Fusion items~~
+- ~~Fight system~~
+- ~~Status integration~~
+- ~~Quests~~
+- Map
+- More skills and items
+- Enchantment update
+- Boss
+- Music
+- Full story integration

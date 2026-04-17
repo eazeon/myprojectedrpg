@@ -8,8 +8,8 @@ from fusion_recipes_lists import fusion_recipes
 from enemy_types_lists import enemy_types
 from quests_list import quests
 
-CURRENT_VERSION = "0.2.1"
-VERSION_NAME = "Pre-Alpha - Quests update"
+CURRENT_VERSION = "0.2.2"
+VERSION_NAME = "Pre-Alpha - Bug fixes & QoL"
 
 SAVE_FILE = "save.csv"
 player_name = ""
@@ -394,6 +394,8 @@ def handle_fusion(display_label, result_label, items_frame):
             text="Échec de la fusion : combinaison inconnue.",
             fg="red"
         )
+        selected_items.clear()
+        display_label.config(text="Aucun élément sélectionné")
         return
 
     recipe = fusion_recipes[selected_set]
@@ -401,6 +403,17 @@ def handle_fusion(display_label, result_label, items_frame):
     # If the recipe is a dictionary with a "result", it's a skill fusion
     if isinstance(recipe, dict) and "result" in recipe:
         result = recipe["result"]
+        is_skill = not recipe.get("consumable", False) and not recipe.get("enchanted", False)
+
+        if is_skill and result in fusion_results:
+            result_label.config(
+                text="Fusion existe déjà !",
+                fg="orange"
+            )
+            selected_items.clear()
+            display_label.config(text="Aucun élément sélectionné")
+            return
+        
         if result not in fusion_results:
             fusion_results.append(result)
 
@@ -671,7 +684,7 @@ def open_rpg_quests_window():
                 command=lambda q=quest: open_quests_dialogue(q)
             ).pack(pady=2, padx=40, anchor="w")
 
-def complete_quest_choice(quest, choice, window):
+def complete_quest_choice(quest, choice, dialogue_win, parent_window):
     global money
 
     if "reward" in choice:
@@ -685,26 +698,70 @@ def complete_quest_choice(quest, choice, window):
 
     quest["completed"] = True
 
+    # Create a larger result window instead of messagebox
+    result_window = tk.Toplevel(parent_window)
+    result_window.title("📜 Résultat de la quête")
+    result_window.geometry("600x450")
+    result_window.configure(bg="#fffaf0")
+    result_window.transient(parent_window)
+    result_window.grab_set()
+    result_window.focus_set()
+
+    # Title
+    tk.Label(result_window, text="✅ Quête complétée !", font=("Verdana", 16, "bold"), bg="#fffaf0", fg="green").pack(pady=20)
+
+    # Quest title
+    tk.Label(result_window, text=quest["title"], font=("Verdana", 13, "bold"), bg="#fffaf0").pack(pady=10)
+
+    # Choice made
+    tk.Label(result_window, text=f"Vous avez choisi :\n{choice['text']}", font=("Verdana", 11, "italic"), bg="#fffaf0", wraplength=550).pack(pady=10, padx=20)
+
+    # Build result text
     if "result_dialogues" in choice:
         msg = "\n".join(choice["result_dialogues"])
+        tk.Label(result_window, text=msg, font=("Verdana", 10), bg="#fffaf0", wraplength=550, justify="left").pack(pady=15, padx=20)
     else:
+        # Build rewards/penalties text
         rewards_text = ""
         if "reward" in choice:
-            rewards_text += f"+{choice['reward'].get('money',0)}💰, +{choice['reward'].get('xp',0)} XP\n"
+            reward = choice["reward"]
+            rewards_text += f"✅ Récompenses :\n"
+            if reward.get("money", 0) > 0:
+                rewards_text += f"  💰 +{reward.get('money', 0)} deullars\n"
+            if reward.get("xp", 0) > 0:
+                rewards_text += f"  ✨ +{reward.get('xp', 0)} XP\n"
+        
         if "penalty" in choice:
-            rewards_text += f"-{choice['penalty'].get('money',0)}💰, -{choice['penalty'].get('xp',0)} XP\n"
-        msg = f"Vous avez choisi : {choice['text']}\n\n{rewards_text.strip()}"
+            penalty = choice["penalty"]
+            rewards_text += f"❌ Pénalités :\n"
+            if penalty.get("money", 0) > 0:
+                rewards_text += f"  💰 -{penalty.get('money', 0)} deullars\n"
+            if penalty.get("xp", 0) > 0:
+                rewards_text += f"  ✨ -{penalty.get('xp', 0)} XP\n"
 
-    messagebox.showinfo("📜 Résultat de la quête", msg)
+        if rewards_text:
+            tk.Label(result_window, text=rewards_text, font=("Verdana", 10), bg="#fffaf0", justify="left").pack(pady=15, padx=20, anchor="w")
 
-    update_main_window()
-    window.destroy()
-    save_game()
-    for w in window.master.winfo_children():
-        if isinstance(w, tk.Toplevel) and w.title() == "📜 Quêtes":
-            w.destroy()
-            open_rpg_quests_window()
-            break
+    # Close button
+    def close_and_refresh():
+        result_window.destroy()
+        dialogue_win.destroy()
+        update_main_window()
+        save_game()
+        # Refresh quests window if it exists
+        for w in parent_window.winfo_children():
+            if isinstance(w, tk.Toplevel) and w.title() == "📜 Quêtes":
+                w.destroy()
+                open_rpg_quests_window()
+                break
+
+    tk.Button(
+        result_window,
+        text="Fermer",
+        font=("Verdana", 12),
+        bg="#dcecf5",
+        command=close_and_refresh
+    ).pack(pady=20)
 
 
 def open_quests_dialogue(quest):
@@ -753,7 +810,7 @@ def open_quests_dialogue(quest):
                     text=choice["text"],
                     font=("Verdana", 11),
                     wraplength=500,
-                    command=lambda c=choice, q=quest, w=dialogue_win: complete_quest_choice(q, c, w)
+                    command=lambda c=choice, q=quest, w=dialogue_win: complete_quest_choice(q, c, w, window)
                 ).pack(pady=5, fill="x", padx=20)
 
         if not has_option:
@@ -1260,7 +1317,7 @@ def open_rpg_ui_window():
     def use_item(item, target="self"):
         disable_all_actions()
 
-        # Check if item is a consumable fusion (from fusion_recipes_lists)
+        # Check if item is a consumable fusion (from fusion_recipes_lists.py)
         fusion_data = None
         for recipe in fusion_recipes.values():
             if isinstance(recipe, dict) and recipe.get("result") == item and recipe.get("consumable"):
@@ -1534,86 +1591,212 @@ initialize_save()  # ensures money and stats exist
 # Main window
 window = tk.Tk()
 window.title("Project RPG")
-window.geometry("800x700")
+window.geometry("1200x900")
+window.configure(bg="#0a0a0a")
 
-# Titre principal
-main_label = tk.Label(window, text=" Project RPG - Menu Principal", font=("Verdana", 18, "bold"))
-main_label.pack(pady=15)
+# ═════════════════════════════════════════════════════════════════════════════
+# HEADER - Dramatic RPG Title with Visual Effects
+# ═════════════════════════════════════════════════════════════════════════════
+header_frame = tk.Frame(window, bg="#1a0f2e", height=140)
+header_frame.pack(fill=tk.X, padx=0, pady=0)
+header_frame.pack_propagate(False)
 
-# Label du nom du joueur en haut à droite
-player_name_label = tk.Label(window, text="", font=("Verdana", 10), anchor="e", justify="right")
-player_name_label.place(relx=1.0, x=-10, y=10, anchor="ne")
+# Decorative top border
+top_border = tk.Frame(header_frame, bg="#ffd700", height=3)
+top_border.pack(fill=tk.X)
 
-# Label de version
-version_label = tk.Label(window, text=f"Version : {CURRENT_VERSION}", font=("Verdana", 9), fg="grey")
-version_label.pack(side=tk.BOTTOM, pady=5)
+# Main title with dramatic styling
+title_frame = tk.Frame(header_frame, bg="#1a0f2e")
+title_frame.pack(fill=tk.BOTH, expand=True)
 
-# Labels d'argent
-main_money_label = tk.Label(window, text=f"💰 Argent : {money} deullars", font=("Verdana", 12))
-main_money_label.pack(pady=5)
+# Decorative shields and divider
+title_label = tk.Label(title_frame, text="⚔️  ═══════════════════════════════════  ⚔️", 
+                       font=("Courier", 12, "bold"), fg="#ffd700", bg="#1a0f2e")
+title_label.pack(pady=5)
 
-# Conteneur pour organiser les catégories
-buttons_frame = tk.Frame(window)
-buttons_frame.pack(pady=20, expand=True)
+# Main title
+main_label = tk.Label(title_frame, text="PROJECT RPG", 
+                      font=("Courier", 36, "bold"), 
+                      fg="#ffed4e", bg="#1a0f2e")
+main_label.pack(pady=0)
 
-def styled_frame(parent, bg_color):
-    return tk.Frame(parent, bd=3, relief=tk.RIDGE, bg=bg_color, padx=10, pady=10)
+# Subtitle
+version_label = tk.Label(title_frame, text=f"[ Version {CURRENT_VERSION} - {VERSION_NAME} ]", 
+                        font=("Courier", 10, "italic"), fg="#a0a0a0", bg="#1a0f2e")
+version_label.pack(pady=2)
+
+# Decorative bottom
+bottom_divider = tk.Label(title_frame, text="⚔️  ═══════════════════════════════════  ⚔️", 
+                          font=("Courier", 12, "bold"), fg="#ffd700", bg="#1a0f2e")
+bottom_divider.pack(pady=5)
+
+# ═════════════════════════════════════════════════════════════════════════════
+# PLAYER STATS BAR
+# ═════════════════════════════════════════════════════════════════════════════
+stats_frame = tk.Frame(window, bg="#0d0d0d", height=60)
+stats_frame.pack(fill=tk.X, padx=0, pady=0)
+stats_frame.pack_propagate(False)
+
+# Stats bar background with border
+stats_container = tk.Frame(stats_frame, bg="#1a1a1a", relief=tk.RAISED, bd=2)
+stats_container.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+# Left stats
+left_stats = tk.Frame(stats_container, bg="#1a1a1a")
+left_stats.pack(side=tk.LEFT, padx=15, fill=tk.Y, expand=True)
+
+player_name_label = tk.Label(left_stats, text="", font=("Courier", 12, "bold"), 
+                            fg="#00ff00", bg="#1a1a1a")
+player_name_label.pack(side=tk.LEFT, padx=10)
+
+# Center divider
+divider = tk.Label(stats_container, text="│", font=("Courier", 16), fg="#666666", bg="#1a1a1a")
+divider.pack(side=tk.LEFT, padx=10)
+
+# Right stats
+right_stats = tk.Frame(stats_container, bg="#1a1a1a")
+right_stats.pack(side=tk.RIGHT, padx=15, fill=tk.Y, expand=True)
+
+main_money_label = tk.Label(right_stats, text=f"💰 {money} deullars", 
+                           font=("Courier", 12, "bold"), 
+                           fg="#ffd700", bg="#1a1a1a")
+main_money_label.pack(side=tk.RIGHT, padx=10)
+
+# ═════════════════════════════════════════════════════════════════════════════
+# MAIN CONTENT AREA
+# ═════════════════════════════════════════════════════════════════════════════
+content_frame = tk.Frame(window, bg="#0a0a0a")
+content_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+# Conteneur pour organiser les catégories en grille 2x2
+buttons_frame = tk.Frame(content_frame, bg="#0a0a0a")
+buttons_frame.pack(fill=tk.BOTH, expand=True)
+
+def styled_frame(parent, title, bg_color, border_color, accent_color="#ffd700"):
+    """Create a styled RPG-like frame with title and border"""
+    # Outer frame for border effect
+    outer = tk.Frame(parent, bg=border_color, relief=tk.RAISED, bd=3)
+    outer.pack(side=tk.LEFT, padx=8, pady=8, fill=tk.BOTH, expand=True)
+    
+    # Inner frame with actual content
+    inner = tk.Frame(outer, bg=bg_color, padx=12, pady=12)
+    inner.pack(fill=tk.BOTH, expand=True, padx=2, pady=2)
+    
+    # Top decorative line
+    top_line = tk.Label(inner, text="━━━━━━━━━━━━━━━━━━━━━━━━", 
+                       font=("Courier", 9), fg=accent_color, bg=bg_color)
+    top_line.pack(pady=(0, 8))
+    
+    # Title with fancy styling
+    title_label = tk.Label(inner, text=title, font=("Courier", 12, "bold"), 
+                          fg=accent_color, bg=bg_color)
+    title_label.pack(pady=(0, 10))
+    
+    # Bottom decorative line
+    bottom_line = tk.Label(inner, text="━━━━━━━━━━━━━━━━━━━━━━━━", 
+                          font=("Courier", 9), fg=accent_color, bg=bg_color)
+    bottom_line.pack(pady=(0, 12))
+    
+    return inner
+
+def create_button(parent, text, command, color="button_bg"):
+    """Create a styled RPG button with enhanced visuals"""
+    color_map = {
+        "merchant": "#8b5a00",
+        "player": "#004a8f",
+        "combat": "#8b0000",
+        "magic": "#663399",
+        "neutral": "#444444",
+        "danger": "#b32222"
+    }
+    
+    btn = tk.Button(parent, 
+                   text=text, 
+                   font=("Courier", 9, "bold"),
+                   bg=color_map.get(color, "#444444"),
+                   fg="#ffffff",
+                   activebackground="#ffdd00",
+                   activeforeground="#000000",
+                   relief=tk.RAISED,
+                   bd=2,
+                   padx=10,
+                   pady=10,
+                   highlightthickness=1,
+                   highlightbackground="#666666",
+                   command=command)
+    btn.pack(pady=7, fill=tk.X, expand=False)
+    
+    # Add hover effects
+    def on_enter(event):
+        btn.config(bd=3, relief=tk.SUNKEN)
+    
+    def on_leave(event):
+        btn.config(bd=2, relief=tk.RAISED)
+    
+    btn.bind("<Enter>", on_enter)
+    btn.bind("<Leave>", on_leave)
+    
+    return btn
+
+# Row 1
+row1_frame = tk.Frame(buttons_frame, bg="#0a0a0a")
+row1_frame.pack(fill=tk.BOTH, expand=True)
 
 # ----- Catégorie 1 : Marchands -----
-frame_top_left = styled_frame(buttons_frame, "#f9f1e7")
-frame_top_left.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
-
-tk.Label(frame_top_left, text="Marchands", font=("Verdana", 14, "bold")).pack()
-tk.Button(frame_top_left, text="Entraîneur militaire", font=("Verdana", 12), bg="salmon", fg="black", command=open_military_window).pack(pady=5)
-tk.Button(frame_top_left, text="Marchand militaire", font=("Verdana", 12), bg="salmon", fg="black", command=open_milishop_window).pack(pady=5)
-tk.Button(frame_top_left, text="Maître magicien", font=("Verdana", 12), bg="salmon", fg="black", command=open_magic_window).pack(pady=5)
-tk.Button(frame_top_left, text="Marchand d'objets", font=("Verdana", 12), bg="salmon", fg="black", command=open_itemshop_window).pack(pady=5)
+merchants_frame = styled_frame(row1_frame, "🏪 MARCHANDS 🏪", "#1a1a1a", "#8b6f47", "#daa520")
+create_button(merchants_frame, "⚔️  Entraîneur militaire", open_military_window, "merchant")
+create_button(merchants_frame, "🗡️  Marchand militaire", open_milishop_window, "merchant")
+create_button(merchants_frame, "🔮  Maître magicien", open_magic_window, "magic")
+create_button(merchants_frame, "🧪  Marchand d'objets", open_itemshop_window, "merchant")
 
 # ----- Catégorie 2 : Joueur -----
-frame_top_right = styled_frame(buttons_frame, "#eef5fc")
-frame_top_right.grid(row=0, column=1, padx=20, pady=20, sticky="nsew")
+player_frame = styled_frame(row1_frame, "👤 JOUEUR 👤", "#0a1a2a", "#0066cc", "#4da6ff")
+create_button(player_frame, "✨  Fusion de compétences", open_skills_creation_window, "magic")
+create_button(player_frame, "📖  Inventaire", open_inventaire_window, "player")
+create_button(player_frame, "📈  Améliorer les stats", open_upgrade_window, "player")
+create_button(player_frame, "😴  Se reposer à l'auberge", inn_rest, "neutral")
 
-tk.Label(frame_top_right, text="Joueur", font=("Verdana", 14, "bold")).pack()
-tk.Button(frame_top_right, text="Fusion !", font=("Verdana", 12), bg="purple", fg="white", command=open_skills_creation_window).pack(pady=5)
-tk.Button(frame_top_right, text="Inventaire", font=("Verdana", 12), bg="brown", fg="black", command=open_inventaire_window).pack(pady=5)
-tk.Button(frame_top_right, text="Améliorer les stats", font=("Verdana", 12), bg="lightblue", fg="black", command=open_upgrade_window).pack(pady=5)
-tk.Button(frame_top_right, text="Se reposer à l'auberge", font=("Verdana", 12), command=inn_rest).pack(pady=5)
+# Row 2
+row2_frame = tk.Frame(buttons_frame, bg="#0a0a0a")
+row2_frame.pack(fill=tk.BOTH, expand=True)
 
 # ----- Catégorie 3 : Combat et Quêtes -----
-frame_bottom_left = styled_frame(buttons_frame, "#f3f7e9")
-frame_bottom_left.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
-
-tk.Label(frame_bottom_left, text="Combat et Quêtes", font=("Verdana", 14, "bold")).pack()
-tk.Button(frame_bottom_left, text="Partir à l'attaque", font=("Verdana", 12), bg="orange", fg="black", command=open_rpg_ui_window).pack(pady=5)
-tk.Button(frame_bottom_left, text="Quêtes", font=("Verdana", 12), bg="blue", fg="white", command=open_rpg_quests_window).pack(pady=5)
-tk.Button(frame_bottom_left, text="Carte du monde (WIP)", font=("Verdana", 12), command=open_rpg_ui_map_window).pack(pady=5)
-
+combat_frame = styled_frame(row2_frame, "⚔️  AVENTURE  ⚔️", "#2a0a0a", "#660000", "#ff6b6b")
+create_button(combat_frame, "🗡️  Partir à l'attaque", open_rpg_ui_window, "combat")
+create_button(combat_frame, "📜  Quêtes", open_rpg_quests_window, "combat")
+create_button(combat_frame, "🗺️  Carte du monde (WIP)", open_rpg_ui_map_window, "neutral")
 
 # ----- Catégorie 4 : Options -----
-frame_bottom_right = styled_frame(buttons_frame, "#f7e9f5")
-frame_bottom_right.grid(row=1, column=1, padx=20, pady=20, sticky="nsew")
+options_frame = styled_frame(row2_frame, "⚙️  OPTIONS  ⚙️", "#1a1a2a", "#444444", "#888888")
+create_button(options_frame, "💾  Sauvegarder la partie", save_game, "neutral")
+create_button(options_frame, "🔄  Réinitialiser le jeu", reset_game, "danger")
 
-tk.Label(frame_bottom_right, text="Options", font=("Verdana", 14, "bold")).pack()
-tk.Button(frame_bottom_right, text="💾 Sauvegarder la partie", font=("Verdana", 12), command=save_game).pack(pady=5)
-tk.Button(frame_bottom_right, text="Réinitialiser le jeu", font=("Verdana", 12), bg="red", fg="white", command=reset_game).pack(pady=5)
+# ═════════════════════════════════════════════════════════════════════════════
+# FOOTER
+# ═════════════════════════════════════════════════════════════════════════════
+footer_frame = tk.Frame(window, bg="#0d0d0d", height=40)
+footer_frame.pack(fill=tk.X, side=tk.BOTTOM, padx=0, pady=0)
+footer_frame.pack_propagate(False)
 
-buttons_frame.grid_rowconfigure(0, weight=1)
-buttons_frame.grid_rowconfigure(1, weight=1)
-buttons_frame.grid_columnconfigure(0, weight=1)
-buttons_frame.grid_columnconfigure(1, weight=1)
+# Bottom border
+bottom_border = tk.Frame(footer_frame, bg="#ffd700", height=3)
+bottom_border.pack(fill=tk.X)
 
-# Initialisation sauvegarde après création des labels et boutons
+footer_label = tk.Label(footer_frame, text="⚔️  Bienvenue dans votre aventure épique  ⚔️", 
+                       font=("Courier", 9, "italic"), fg="#888888", bg="#0d0d0d")
+footer_label.pack(pady=3)
+
+# ═════════════════════════════════════════════════════════════════════════════
+# INITIALIZATION & MAIN LOOP
+# ═════════════════════════════════════════════════════════════════════════════
+
+# Initialize the game (load save or create new)
 initialize_save()
 update_main_window()
 
-# Sauvegarde auto à la fermeture
-def on_close():
-    save_game()
-    window.destroy()
+# Display the main window
+player_name_label.config(text=f"👤 {player_name}")
 
-window.protocol("WM_DELETE_WINDOW", on_close)
-
-window.mainloop()
-
+# Start the main event loop
 window.mainloop()
 

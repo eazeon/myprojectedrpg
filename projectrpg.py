@@ -1673,7 +1673,6 @@ buttons_frame = tk.Frame(content_frame, bg="#0a0a0a")
 buttons_frame.pack(fill=tk.BOTH, expand=True)
 
 def styled_frame(parent, title, bg_color, border_color, accent_color="#ffd700"):
-    """Create a styled RPG-like frame with title and border"""
     # Outer frame for border effect
     outer = tk.Frame(parent, bg=border_color, relief=tk.RAISED, bd=3)
     outer.pack(side=tk.LEFT, padx=8, pady=8, fill=tk.BOTH, expand=True)
@@ -1700,7 +1699,6 @@ def styled_frame(parent, title, bg_color, border_color, accent_color="#ffd700"):
     return inner
 
 def create_button(parent, text, command, color="button_bg"):
-    """Create a styled RPG button with enhanced visuals"""
     color_map = {
         "merchant": "#8b5a00",
         "player": "#004a8f",
@@ -1782,7 +1780,7 @@ footer_frame.pack_propagate(False)
 bottom_border = tk.Frame(footer_frame, bg="#ffd700", height=3)
 bottom_border.pack(fill=tk.X)
 
-footer_label = tk.Label(footer_frame, text="⚔️  Bienvenue dans votre aventure épique  ⚔️", 
+footer_label = tk.Label(footer_frame, text="⚔️  Un jeu par Eazeon  ⚔️", 
                        font=("Courier", 9, "italic"), fg="#888888", bg="#0d0d0d")
 footer_label.pack(pady=3)
 

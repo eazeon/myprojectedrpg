@@ -39,11 +39,11 @@ Vous pouvez aussi désormais accéder à certaines quêtes (deux pour le moment)
 # Problèmes connus
 - Lorsque l'on chercher à fusionner des objets il est possible que la mécanique de fusion rencontre quelques problèmes : fermer et rouvrir la fenêtre devrait permettre de nouveau de fusionner sans soucis
 - Il est possible d'être bloqué avec une ardoise insuffisante pour se reposer a l'auberge -> prochain patch
-- "Fusion réussie" même quand fusion existe déjà
+- ~~"Fusion réussie" même quand fusion existe déjà~~
 - Problème avec le heal qui ne fonctionne pas bien
 - Blocage d'une attaque très efficace
 - Inventaire pas complet
-- Si fusion impossible : effacer la sélection
+- ~~Si fusion impossible : effacer la sélection~~
 
 # Prochain patch
 - Map update

@@ -7,8 +7,9 @@ import csv
 from fusion_recipes_lists import fusion_recipes
 from enemy_types_lists import enemy_types
 from quests_list import quests
+from gui_appearance import *
 
-CURRENT_VERSION = "0.2.2"
+CURRENT_VERSION = "0.2.5"
 VERSION_NAME = "Pre-Alpha - Bug fixes & QoL"
 
 SAVE_FILE = "save.csv"
@@ -218,21 +219,27 @@ def inn_rest():
 def open_inventaire_window():
     inventaire_window = tk.Toplevel(window)
     inventaire_window.title("Inventaire")
-    inventaire_window.geometry("900x800")
+    inventaire_window.geometry(f"{WINDOW_WIDTH_INVENTORY}x{WINDOW_HEIGHT_INVENTORY}")
     inventaire_window.transient(window)
     inventaire_window.grab_set()
     inventaire_window.focus_set()
 
-    inventaire_window.configure(bg="#fff9ec")
-    tk.Label(inventaire_window, text="📖 Fusions Réalisées", font=("Verdana", 14, "bold"), bg="#fff9ec").pack(pady=10)
+    inventaire_window.configure(bg=COLOR_LIGHT_BG)
+    
+    # Create two sections: Fusions and Items
+    sections_frame = tk.Frame(inventaire_window, bg="#fff9ec")
+    sections_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+    
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SECTION 1: FUSIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    tk.Label(sections_frame, text="📖 Fusions Réalisées", font=("Verdana", 14, "bold"), bg="#fff9ec").pack(pady=10, anchor="w")
 
-    scroll_canvas = tk.Canvas(inventaire_window, bg="#fff9ec", highlightthickness=0)
+    scroll_canvas = tk.Canvas(sections_frame, bg="#fff9ec", highlightthickness=0, height=300)
     scroll_frame = tk.Frame(scroll_canvas, bg="#fff9ec")
-    scrollbar = tk.Scrollbar(inventaire_window, orient="vertical", command=scroll_canvas.yview)
+    scrollbar = tk.Scrollbar(sections_frame, orient="vertical", command=scroll_canvas.yview)
     scroll_canvas.configure(yscrollcommand=scrollbar.set)
 
-    scrollbar.pack(side="right", fill="y")
-    scroll_canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y", pady=(20, 0))
+    scroll_canvas.pack(side="left", fill="both", expand=True, pady=(0, 10))
     scroll_canvas.create_window((0, 0), window=scroll_frame, anchor="nw")
 
     scroll_frame.bind("<Configure>", lambda e: scroll_canvas.configure(scrollregion=scroll_canvas.bbox("all")))
@@ -328,6 +335,45 @@ def open_inventaire_window():
             font=("Verdana", 12),
             bg="#fff9ec"
         ).pack(pady=20)
+    
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SECTION 2: ITEMS & CONSOMMABLES ━━━━━━━━━━━━━━━━━
+    tk.Label(sections_frame, text="🧪 Objets & Consommables", font=("Verdana", 14, "bold"), bg="#fff9ec").pack(pady=10, anchor="w")
+    
+    # Count items and show with quantities
+    items_canvas = tk.Canvas(sections_frame, bg="#fff9ec", highlightthickness=0, height=250)
+    items_frame = tk.Frame(items_canvas, bg="#fff9ec")
+    items_scrollbar = tk.Scrollbar(sections_frame, orient="vertical", command=items_canvas.yview)
+    items_canvas.configure(yscrollcommand=items_scrollbar.set)
+    
+    items_scrollbar.pack(side="right", fill="y")
+    items_canvas.pack(side="left", fill="both", expand=True)
+    items_canvas.create_window((0, 0), window=items_frame, anchor="nw")
+    
+    items_frame.bind("<Configure>", lambda e: items_canvas.configure(scrollregion=items_canvas.bbox("all")))
+    
+    if purchased_items:
+        # Count items
+        item_counts = {}
+        for item in purchased_items:
+            item_counts[item] = item_counts.get(item, 0) + 1
+        
+        # Display with counts
+        for item, count in sorted(item_counts.items()):
+            count_text = f"  x{count}" if count > 1 else ""
+            tk.Label(
+                items_frame,
+                text=f"• {item}{count_text}",
+                font=("Verdana", 11),
+                bg="#fff9ec",
+                anchor="w"
+            ).pack(fill="x", padx=20, pady=3)
+    else:
+        tk.Label(
+            items_frame,
+            text="Aucun objet",
+            font=("Verdana", 11),
+            bg="#fff9ec"
+        ).pack(pady=20)
 
 
 
@@ -335,17 +381,17 @@ class ShopWindow:
     def __init__(self, title, button_texts):
         self.window = tk.Toplevel(window)
         self.window.title(title)
-        self.window.geometry("600x500")
+        self.window.geometry(f"{WINDOW_WIDTH_SHOP}x{WINDOW_HEIGHT_SHOP}")
 
         # Display money
-        self.window.configure(bg="#f9f5ec")
+        self.window.configure(bg=COLOR_LIGHT_BG_CREAM)
 
-        self.money_label = tk.Label(self.window, text=f"💰 Argent : {money} deullars", font=("Verdana", 12), bg="#f9f5ec")
+        self.money_label = tk.Label(self.window, text=f"💰 Argent : {money} deullars", font=FONT_WINDOW_SMALL, bg=COLOR_LIGHT_BG_CREAM)
         self.money_label.pack(pady=10)
 
-        tk.Label(self.window, text=f"🏪 Bienvenue chez le {title}", font=("Verdana", 14, "bold"), bg="#f9f5ec").pack(pady=10)
+        tk.Label(self.window, text=f"🏪 Bienvenue chez le {title}", font=FONT_WINDOW_TITLE, bg=COLOR_LIGHT_BG_CREAM).pack(pady=10)
 
-        frame = tk.Frame(self.window, bg="#f9f5ec")
+        frame = tk.Frame(self.window, bg=COLOR_LIGHT_BG_CREAM)
         frame.pack(pady=5)
 
         for text in button_texts:
@@ -354,7 +400,7 @@ class ShopWindow:
             btn = tk.Button(
                 frame,
                 text=f"{item_name} - {cost} 💰",
-                font=("Verdana", 10),
+                font=FONT_WINDOW_TINY,
                 width=40,
                 bg="#f0e6d6",
                 command=lambda t=item_name, c=cost: self.handle_purchase(t, c)
@@ -378,27 +424,70 @@ class ShopWindow:
             messagebox.showerror("Erreur", "Pas assez d'argent !")
 
 
+def format_selected_items_display(items_list):
+    """Format the selected items display with counts (e.g., 'Potion x2, Épée x1')"""
+    if not items_list:
+        return "Aucun \u00e9l\u00e9ment s\u00e9lectionn\u00e9"
+    
+    # Count occurrences of each item
+    item_counts = {}
+    for item in items_list:
+        item_counts[item] = item_counts.get(item, 0) + 1
+    
+    # Format as "Item x count"
+    formatted_items = [f"{item} x{count}" if count > 1 else item for item, count in item_counts.items()]
+    return ", ".join(formatted_items)
+
+def get_fusion_recipe(selected_items_list):
+    """
+    Find a fusion recipe that matches the selected items.
+    Tries both frozenset (original format) and sorted tuple approaches.
+    """
+    if not selected_items_list:
+        return None
+    
+    # Try frozenset first (original recipe format)
+    try:
+        recipe_key = frozenset(selected_items_list)
+        if recipe_key in fusion_recipes:
+            return fusion_recipes[recipe_key]
+    except:
+        pass
+    
+    # Try sorted tuple (supports duplicates like Potion x2)
+    try:
+        recipe_key = tuple(sorted(selected_items_list))
+        # Check if any frozenset in fusion_recipes matches when converted to sorted tuple
+        for key, value in fusion_recipes.items():
+            if isinstance(key, (frozenset, set)):
+                if tuple(sorted(key)) == recipe_key:
+                    return value
+    except:
+        pass
+    
+    return None
+
 def toggle_item_display(item_name, display_label):
     if item_name in selected_items:
         selected_items.remove(item_name)
     else:
         selected_items.append(item_name)
-    display_label.config(text=", ".join(selected_items) if selected_items else "Aucun \u00e9l\u00e9ment s\u00e9lectionn\u00e9")
+    display_label.config(text=format_selected_items_display(selected_items))
 
 def handle_fusion(display_label, result_label, items_frame):
     global fusion_results
-    selected_set = frozenset(selected_items)
     
-    if selected_set not in fusion_recipes:
+    # Get the recipe using the flexible matching function
+    recipe = get_fusion_recipe(selected_items)
+    
+    if recipe is None:
         result_label.config(
             text="Échec de la fusion : combinaison inconnue.",
             fg="red"
         )
         selected_items.clear()
-        display_label.config(text="Aucun élément sélectionné")
+        display_label.config(text=format_selected_items_display(selected_items))
         return
-
-    recipe = fusion_recipes[selected_set]
     
     # If the recipe is a dictionary with a "result", it's a skill fusion
     if isinstance(recipe, dict) and "result" in recipe:
@@ -411,7 +500,7 @@ def handle_fusion(display_label, result_label, items_frame):
                 fg="orange"
             )
             selected_items.clear()
-            display_label.config(text="Aucun élément sélectionné")
+            display_label.config(text=format_selected_items_display(selected_items))
             return
         
         if result not in fusion_results:
@@ -505,55 +594,48 @@ def handle_fusion(display_label, result_label, items_frame):
 
     # Effacer de la sélection les éléments
     selected_items.clear()
-    display_label.config(text="Aucun élément sélectionné")
+    display_label.config(text=format_selected_items_display(selected_items))
 
-def add_to_fusion(item_name, display_label):
-    selected_items.append(item_name)
-    display_label.config(text=", ".join(selected_items))
-
-
-# Fonction pour effacer la sélection
-def clear_selection(display_label):
-    selected_items.clear()
-    display_label.config(text="Aucun élément sélectionné")
 
 # Fenêtre de création de compétences
 def open_skills_creation_window():
+    global selected_items
+    selected_items.clear()  # Clear any previous selections
+    
     skills_window = tk.Toplevel()
     skills_window.title("Création des compétences")
-    skills_window.geometry("900x600")
+    skills_window.geometry(f"{WINDOW_WIDTH_SKILLS}x{WINDOW_HEIGHT_SKILLS}")
     skills_window.transient(window)
     skills_window.grab_set()
     skills_window.focus_set()
 
-    skills_window.configure(bg="#eef7ff")
+    skills_window.configure(bg=COLOR_LIGHT_BG_BLUE)
     tk.Label(skills_window, text="🔮 Création des compétences", font=("Verdana", 14, "bold"), bg="#eef7ff").pack(pady=20)
 
-    display_label = tk.Label(skills_window, text="Aucun élément sélectionné", font=("Verdana", 12), wraplength=500)
+    # Selection display
+    display_label = tk.Label(skills_window, text=format_selected_items_display(selected_items), font=("Verdana", 12), wraplength=500)
     display_label.pack(pady=10)
 
+    # Clear button
     clear_button = tk.Button(
         skills_window,
         text="Effacer la sélection",
         font=("Verdana", 10),
-        command=lambda: clear_selection(display_label)
+        command=lambda: (selected_items.clear(), display_label.config(text=format_selected_items_display(selected_items)), refresh_grid())
     )
     clear_button.pack(pady=5)
 
-    # Scrollable area wrapper
+    # Scrollable area for items
     scroll_area = tk.Frame(skills_window)
-    scroll_area.pack(fill="both", expand=True)
+    scroll_area.pack(fill="both", expand=True, padx=10, pady=10)
 
-    # Canvas for scrolling
-    canvas = tk.Canvas(scroll_area)
+    canvas = tk.Canvas(scroll_area, bg="#eef7ff", highlightthickness=0)
     scrollbar = tk.Scrollbar(scroll_area, orient="vertical", command=canvas.yview)
-    scrollable_frame = tk.Frame(canvas)
+    scrollable_frame = tk.Frame(canvas, bg="#eef7ff")
 
     scrollable_frame.bind(
         "<Configure>",
-        lambda e: canvas.configure(
-            scrollregion=canvas.bbox("all")
-        )
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
     )
 
     canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
@@ -562,68 +644,121 @@ def open_skills_creation_window():
     canvas.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
 
-    # Categorize items
-    categories = {
-        "🗡️ Armes & équipement": [],
-        "🔮 Magies & techniques": [],
-        "✨ Objets enchantés": [],
-        "🧪 Consommables": []
-    }
+    def refresh_grid():
+        """Refresh the item grid display"""
+        for widget in scrollable_frame.winfo_children():
+            widget.destroy()
+        
+        # Count available items (unique items only)
+        available_items = {}
+        for item in purchased_items:
+            available_items[item] = available_items.get(item, 0) + 1
+        
+        # Count currently selected items
+        selected_item_counts = {}
+        for item in selected_items:
+            selected_item_counts[item] = selected_item_counts.get(item, 0) + 1
+        
+        # Categorize items by unique name
+        categories = {
+            "🗡️ Armes & équipement": [],
+            "🔮 Magies & techniques": [],
+            "✨ Objets enchantés": [],
+            "🧪 Consommables": []
+        }
 
-    for item in purchased_items:
-        if item in itemshop_items:
-            categories["🧪 Consommables"].append(item)
-        elif "Magie" in item or item in ["Coup simple", "Coup puissant", "Parade"]:
-            categories["🔮 Magies & techniques"].append(item)
-        else:
-            categories["🗡️ Armes & équipement"].append(item)
+        for item in sorted(set(purchased_items)):  # Use set to get unique items
+            if item in itemshop_items:
+                categories["🧪 Consommables"].append(item)
+            elif "Magie" in item or item in ["Coup simple", "Coup puissant", "Parade"]:
+                categories["🔮 Magies & techniques"].append(item)
+            else:
+                categories["🗡️ Armes & équipement"].append(item)
 
-    for fusion in fusion_results:
-        for key, val in fusion_recipes.items():
-            if isinstance(val, dict) and val.get("result") == fusion:
-                if val.get("enchanted", False):
-                    categories["✨ Objets enchantés"].append(fusion)
-                elif val.get("consumable", False):
-                    categories["🧪 Consommables"].append(fusion)
+        for fusion in fusion_results:
+            for key, val in fusion_recipes.items():
+                if isinstance(val, dict) and val.get("result") == fusion:
+                    if val.get("enchanted", False):
+                        categories["✨ Objets enchantés"].append(fusion)
+                    elif val.get("consumable", False):
+                        categories["🧪 Consommables"].append(fusion)
+                    break
 
-    # Display categorized items in grid layout
-    for category, items in categories.items():
-        if items:
-            tk.Label(scrollable_frame, text=category, font=("Verdana", 11, "bold")).pack(pady=(10, 0), anchor="w")
+        # Display categorized items with +/- buttons and counts
+        for category, items in categories.items():
+            if items:
+                tk.Label(scrollable_frame, text=category, font=("Verdana", 11, "bold"), bg="#eef7ff").pack(pady=(10, 0), anchor="w", padx=10)
 
-            category_frame = tk.Frame(scrollable_frame)
-            category_frame.pack(pady=5, fill="x", padx=10)
+                category_frame = tk.Frame(scrollable_frame, bg="#eef7ff")
+                category_frame.pack(pady=5, fill="x", padx=10)
 
-            for i, item in enumerate(items):
-                btn = tk.Button(
-                    category_frame,
-                    text=item,
-                    font=("Verdana", 10),
-                    width=20,
-                    command=lambda i=item: add_to_fusion(i, display_label)
-                )
-                btn.grid(row=i // 3, column=i % 3, padx=5, pady=5, sticky="w")
+                for i, item in enumerate(items):
+                    available_count = available_items.get(item, 0)
+                    selected_count = selected_item_counts.get(item, 0)
+                    
+                    item_frame = tk.Frame(category_frame, bg="#fff7f0", relief=tk.RAISED, bd=1)
+                    item_frame.grid(row=i // 2, column=(i % 2) * 2, padx=5, pady=5, sticky="ew", columnspan=2)
+                    
+                    # Item name with available count
+                    item_display = f"{item}  (Disponible: {available_count})"
+                    tk.Label(item_frame, text=item_display, font=("Verdana", 10), bg="#fff7f0", anchor="w").pack(side=tk.LEFT, fill=tk.X, expand=True, padx=10, pady=5)
+                    
+                    # Minus button
+                    tk.Button(
+                        item_frame,
+                        text="−",
+                        font=("Verdana", 12, "bold"),
+                        width=3,
+                        bg="#ffcccc",
+                        command=lambda i=item: (selected_items.remove(i) if i in selected_items else None, display_label.config(text=format_selected_items_display(selected_items)))
+                    ).pack(side=tk.LEFT, padx=2, pady=5)
+                    
+                    # Plus button - only enabled if we have more available
+                    def make_add_command(item_name, avail_count):
+                        def add_item():
+                            # Recalculate current selected count dynamically (not from cached value)
+                            current_selected = sum(1 for item in selected_items if item == item_name)
+                            if current_selected < avail_count:
+                                selected_items.append(item_name)
+                                display_label.config(text=format_selected_items_display(selected_items))
+                            else:
+                                messagebox.showwarning("Limite atteinte", f"Vous ne pouvez pas sélectionner plus de {avail_count} {item_name}(s).")
+                        return add_item
+                    
+                    plus_button = tk.Button(
+                        item_frame,
+                        text="+",
+                        font=("Verdana", 12, "bold"),
+                        width=3,
+                        bg="#ccffcc",
+                        command=make_add_command(item, available_count)
+                    )
+                    plus_button.pack(side=tk.LEFT, padx=2, pady=5)
+
+    # Initial grid refresh
+    refresh_grid()
 
     # Bottom panel for result and fusion button
-    bottom_frame = tk.Frame(skills_window)
-    bottom_frame.pack(pady=10)
+    bottom_frame = tk.Frame(skills_window, bg="#eef7ff")
+    bottom_frame.pack(pady=10, fill=tk.X)
 
     result_label = tk.Label(bottom_frame, text="", font=("Verdana", 12), wraplength=600)
     result_label.pack(pady=5)
 
     fusion_button = tk.Button(
         bottom_frame,
-        text="Fusion",
+        text="🔥 Fusionner",
         font=("Verdana", 16, "bold"),
-        command=lambda: handle_fusion(display_label, result_label, scrollable_frame)
+        bg="#ffaa00",
+        command=lambda: (handle_fusion(display_label, result_label, scrollable_frame), refresh_grid())
     )
     fusion_button.pack(pady=5)
 
 def open_rpg_ui_map_window():
     map_window = tk.Toplevel(window)
     map_window.title("Carte du monde")
-    map_window.geometry("900x700")
-    map_window.configure(bg="#fffaf0")
+    map_window.geometry(f"{WINDOW_WIDTH_MAP}x{WINDOW_HEIGHT_MAP}")
+    map_window.configure(bg=COLOR_LIGHT_BG_SOFT)
     map_window.transient(window)
     map_window.grab_set()
     map_window.focus_set()
@@ -655,8 +790,8 @@ def open_rpg_ui_map_window():
 def open_rpg_quests_window():
     quests_window = tk.Toplevel(window)
     quests_window.title("📜 Quêtes")
-    quests_window.geometry("800x600")
-    quests_window.configure(bg="#fffaf0")
+    quests_window.geometry(f"{WINDOW_WIDTH_QUESTS}x{WINDOW_HEIGHT_QUESTS}")
+    quests_window.configure(bg=COLOR_LIGHT_BG_SOFT)
     quests_window.transient(window)
     quests_window.grab_set()
     quests_window.focus_set()
@@ -823,48 +958,53 @@ def open_quests_dialogue(quest):
 def open_rpg_ui_window():
     global last_combat_result
 
+
+    # --- RPG Combat Window Redesign ---
     rpg_window = tk.Toplevel(window)
-    rpg_window.title("RPG Combat")
-    rpg_window.geometry("1200x900")
+    rpg_window.title("⚔️ Combat RPG")
+    rpg_window.geometry(f"{WINDOW_WIDTH_COMBAT}x{WINDOW_HEIGHT_COMBAT}")
+    rpg_window.configure(bg=COLOR_COMBAT_BG)
     rpg_window.transient(window)
     rpg_window.grab_set()
     rpg_window.focus_set()
 
-    main_frame = tk.Frame(rpg_window)
+    main_frame = tk.Frame(rpg_window, bg=COLOR_COMBAT_BG)
     main_frame.pack(fill=tk.BOTH, expand=True)
 
-    left_frame = tk.Frame(main_frame)
-    left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10)
+    # Left: Player Panel
+    left_frame = tk.Frame(main_frame, bg=COLOR_COMBAT_BG, bd=2, relief=tk.GROOVE)
+    left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-    right_container = tk.Frame(main_frame)
-    right_container.pack(side=tk.RIGHT, fill=tk.Y, padx=10)
+    # Right: Enemy Panel
+    right_panel = tk.Frame(main_frame, bg=COLOR_COMBAT_BG, bd=2, relief=tk.GROOVE)
+    right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-    right_canvas = tk.Canvas(right_container)
-    right_scrollbar = tk.Scrollbar(right_container, orient="vertical", command=right_canvas.yview)
-    right_frame = tk.Frame(right_canvas)  # <- keep using right_frame everywhere else
+    # Center: Combat Log and Actions
+    center_frame = tk.Frame(main_frame, bg=COLOR_COMBAT_STATUS_BG, bd=2, relief=tk.RIDGE)
+    center_frame.place(relx=0.5, rely=0.5, anchor="center", width=500, height=650)
 
-    right_frame.bind(
-        "<Configure>",
-        lambda e: right_canvas.configure(scrollregion=right_canvas.bbox("all"))
-    )
+    # --- Player Section ---
+    player_title = tk.Label(left_frame, text="🧑 Joueur", font=FONT_COMBAT_TITLE, fg=COLOR_COMBAT_GREEN, bg=COLOR_COMBAT_BG)
+    player_title.pack(pady=10)
+    # Placeholder for portrait
+    player_portrait = tk.Label(left_frame, text="[Portrait]", font=FONT_WINDOW_SMALL, fg=COLOR_COMBAT_GRAY, bg=COLOR_COMBAT_BG, width=12, height=6, relief=tk.RIDGE)
+    player_portrait.pack(pady=5)
 
-    right_canvas.create_window((0, 0), window=right_frame, anchor="nw")
-    right_canvas.configure(yscrollcommand=right_scrollbar.set)
-
-    right_canvas.pack(side=tk.LEFT, fill="y", expand=True)
-    right_scrollbar.pack(side=tk.RIGHT, fill="y")
-
-
-    tk.Label(left_frame, text="⚔️ Combat RPG", font=("Verdana", 16, "bold")).pack(pady=10)
-
-    combat_frame = tk.Frame(left_frame)
-    combat_frame.pack(pady=10)
-
-    bars_frame = tk.Frame(left_frame)
+    bars_frame = tk.Frame(left_frame, bg=COLOR_COMBAT_BG)
     bars_frame.pack(pady=10)
 
-    status_frame = tk.Frame(left_frame)
-    status_frame.pack(pady=5)
+    # --- Enemy Section ---
+    enemy_title = tk.Label(right_panel, text="👹 Ennemi", font=FONT_COMBAT_TITLE, fg=COLOR_COMBAT_RED, bg=COLOR_COMBAT_BG)
+    enemy_title.pack(pady=10)
+    enemy_portrait = tk.Label(right_panel, text="[Portrait]", font=FONT_WINDOW_SMALL, fg=COLOR_COMBAT_GRAY, bg=COLOR_COMBAT_BG, width=12, height=6, relief=tk.RIDGE)
+    enemy_portrait.pack(pady=5)
+
+    enemy_bars_frame = tk.Frame(right_panel, bg="#23272e")
+    enemy_bars_frame.pack(pady=10)
+
+    # --- Status Section ---
+    status_frame = tk.Frame(center_frame, bg="#181a20")
+    status_frame.pack(pady=5, fill="x")
 
     player_status_text = None
     enemy_status_text = None
@@ -924,15 +1064,13 @@ def open_rpg_ui_window():
             enemy_status_text.config(text=format_status(enemy_status_effects))
 
 
-    status_frame = tk.Frame(left_frame)
-    status_frame.pack(pady=5)
 
-    tk.Label(status_frame, text="🧍 Statuts joueur : ", font=("Verdana", 10, "bold"), anchor="w", justify="left").pack(fill="x", padx=10)
-    player_status_text = tk.Label(status_frame, text="", font=("Verdana", 9), anchor="w", justify="left")
+    tk.Label(status_frame, text="🧍 Statuts joueur : ", font=("Verdana", 10, "bold"), fg="#00ff99", bg="#181a20", anchor="w", justify="left").pack(fill="x", padx=10)
+    player_status_text = tk.Label(status_frame, text="", font=("Verdana", 9), fg="#cccccc", bg="#181a20", anchor="w", justify="left")
     player_status_text.pack(fill="x", padx=20)
 
-    tk.Label(status_frame, text="👹 Statuts ennemi : ", font=("Verdana", 10, "bold"), anchor="w", justify="left").pack(fill="x", padx=10)
-    enemy_status_text = tk.Label(status_frame, text="", font=("Verdana", 9), anchor="w", justify="left")
+    tk.Label(status_frame, text="👹 Statuts ennemi : ", font=("Verdana", 10, "bold"), fg="#ff5555", bg="#181a20", anchor="w", justify="left").pack(fill="x", padx=10)
+    enemy_status_text = tk.Label(status_frame, text="", font=("Verdana", 9), fg="#cccccc", bg="#181a20", anchor="w", justify="left")
     enemy_status_text.pack(fill="x", padx=20)
 
 
@@ -950,11 +1088,21 @@ def open_rpg_ui_window():
                 floating.destroy()
         animate()
 
+    # --- Skills Frame for skills display ---
+    if hasattr(open_rpg_ui_window, "skills_frame"):
+        try:
+            open_rpg_ui_window.skills_frame.destroy()
+        except Exception:
+            pass
+    skills_frame = tk.Frame(center_frame, bg="#23272e")
+    skills_frame.pack(pady=5, fill="x")
+    open_rpg_ui_window.skills_frame = skills_frame
+
     def update_skills_display():
-        for widget in right_frame.winfo_children():
+        for widget in skills_frame.winfo_children():
             widget.destroy()
 
-        tk.Label(right_frame, text="Compétences disponibles", font=("Verdana", 12, "bold")).pack(pady=5)
+        tk.Label(skills_frame, text="Compétences disponibles", font=("Verdana", 12, "bold"), fg="#44ccff", bg="#23272e").pack(pady=5)
 
         for fusion in fusion_results:
             for key, val in fusion_recipes.items():
@@ -963,14 +1111,14 @@ def open_rpg_ui_window():
                         continue
                     if val.get("consumable", False):
                         break
-                    frame = tk.Frame(right_frame, bd=1, relief=tk.SOLID)
+                    frame = tk.Frame(skills_frame, bd=1, relief=tk.SOLID, bg="#23272e")
                     frame.pack(pady=3, fill=tk.X)
-                    tk.Label(frame, text=fusion, font=("Verdana", 10, "bold")).pack(anchor="w")
-                    tk.Label(frame, text=f"Dégâts: {val.get('damage', 0)}", font=("Verdana", 9)).pack(anchor="w")
-                    tk.Label(frame, text=f"Coût: {val.get('mana_cost', 0)} mana, {val.get('fatigue_cost', 0)} fatigue", font=("Verdana", 9)).pack(anchor="w")
-                    tk.Button(frame, text="Utiliser", font=("Verdana", 9), command=lambda v=val: use_skill(v)).pack(pady=2)
+                    tk.Label(frame, text=fusion, font=("Verdana", 10, "bold"), fg="#eeeeee", bg="#23272e").pack(anchor="w")
+                    tk.Label(frame, text=f"Dégâts: {val.get('damage', 0)}", font=("Verdana", 9), fg="#cccccc", bg="#23272e").pack(anchor="w")
+                    tk.Label(frame, text=f"Coût: {val.get('mana_cost', 0)} mana, {val.get('fatigue_cost', 0)} fatigue", font=("Verdana", 9), fg="#cccccc", bg="#23272e").pack(anchor="w")
+                    tk.Button(frame, text="Utiliser", font=("Verdana", 9), bg="#4444ff", fg="#fff", activebackground="#222288", command=lambda v=val: use_skill(v)).pack(pady=2)
 
-        tk.Label(right_frame, text="Objets disponibles", font=("Verdana", 12, "bold")).pack(pady=5)
+        tk.Label(skills_frame, text="Objets disponibles", font=("Verdana", 12, "bold"), fg="#ffaa00", bg="#23272e").pack(pady=5)
         update_item_display()
 
     def apply_status_effect(name, target, duration, damage_per_turn, element):
@@ -1020,16 +1168,19 @@ def open_rpg_ui_window():
         log_message(f"⚔️ Combat {fight_counter['count']} commencé contre {current_enemy['name']} !")
         update_skills_display()
 
-    def create_bar(label_text, color, max_value=100):
-        container = tk.Frame(bars_frame)
+
+    def create_bar(label_text, color, max_value=100, parent=None):
+        if parent is None:
+            parent = bars_frame
+        container = tk.Frame(parent, bg="#23272e")
         container.pack(pady=5)
-        label = tk.Label(container, text=label_text, font=("Verdana", 10))
+        label = tk.Label(container, text=label_text, font=("Verdana", 10, "bold"), fg=color, bg="#23272e")
         label.pack(side=tk.LEFT, padx=5)
-        width = max(200, int(max_value * 2))
-        canvas = tk.Canvas(container, width=width, height=20, bg="grey")
+        width = max(200, int(max_value * 1.5))
+        canvas = tk.Canvas(container, width=width, height=20, bg="#181a20", highlightthickness=0)
         canvas.pack(side=tk.LEFT)
         bar = canvas.create_rectangle(0, 0, width, 20, fill=color)
-        value_label = tk.Label(container, text=f"{max_value}/{max_value}", font=("Verdana", 10))
+        value_label = tk.Label(container, text=f"{max_value}/{max_value}", font=("Verdana", 10), fg="#cccccc", bg="#23272e")
         value_label.pack(side=tk.LEFT, padx=5)
         return canvas, bar, value_label, width
 
@@ -1043,13 +1194,15 @@ def open_rpg_ui_window():
     current_enemy = {"name": "", "resistances": {}, "damage_range": (5, 15), "hp": 100}
 
     # create bars AFTER start values to get widths using max stats
-    player_hp_canvas, player_hp_bar, player_hp_label, player_hp_width = create_bar("Santé joueur", "green", player_stats["max_hp"])
-    enemy_hp_canvas, enemy_hp_bar, enemy_hp_label, enemy_hp_width = create_bar("Santé ennemi", "red", 100)
-    mana_canvas, mana_bar, mana_label, mana_width = create_bar("Mana joueur", "blue", player_stats["max_mana"])
-    fatigue_canvas, fatigue_bar, fatigue_label, fatigue_width = create_bar("Fatigue joueur", "orange", player_stats["max_fatigue"])
+
+    player_hp_canvas, player_hp_bar, player_hp_label, player_hp_width = create_bar("Santé", "#00ff99", player_stats["max_hp"], parent=bars_frame)
+    mana_canvas, mana_bar, mana_label, mana_width = create_bar("Mana", "#3399ff", player_stats["max_mana"], parent=bars_frame)
+    fatigue_canvas, fatigue_bar, fatigue_label, fatigue_width = create_bar("Fatigue", "#ffaa00", player_stats["max_fatigue"], parent=bars_frame)
+    enemy_hp_canvas, enemy_hp_bar, enemy_hp_label, enemy_hp_width = create_bar("Santé", "#ff5555", 100, parent=enemy_bars_frame)
 
 
-    log_text = tk.Text(left_frame, height=15, width=60, state=tk.DISABLED)
+
+    log_text = tk.Text(center_frame, height=15, width=56, state=tk.DISABLED, bg="#181a20", fg="#eeeeee", font=("Consolas", 11), relief=tk.FLAT)
     log_text.pack(pady=10)
 
     def check_player_defeat(fight_window):
@@ -1084,6 +1237,7 @@ def open_rpg_ui_window():
         log_text.see(tk.END)
         log_text.config(state=tk.DISABLED)
 
+
     def set_state_all_buttons_in(widget, state):
         for child in widget.winfo_children():
             if isinstance(child, tk.Button):
@@ -1093,11 +1247,13 @@ def open_rpg_ui_window():
 
     def disable_all_actions():
         attack_button.config(state="disabled")
-        set_state_all_buttons_in(right_frame, "disabled")
+        set_state_all_buttons_in(center_frame, "disabled")
+        set_state_all_buttons_in(skills_frame, "disabled")
 
     def enable_all_actions():
         attack_button.config(state="normal")
-        set_state_all_buttons_in(right_frame, "normal")
+        set_state_all_buttons_in(center_frame, "normal")
+        set_state_all_buttons_in(skills_frame, "normal")
 
 
     def enemy_attack():
@@ -1284,8 +1440,9 @@ def open_rpg_ui_window():
             frame.destroy()
         item_frames.clear()
 
+        # --- Stack items by count ---
+        from collections import Counter
         all_items = list(purchased_items)
-
         for fusion in fusion_results:
             for key, val in fusion_recipes.items():
                 if isinstance(val, dict) and val.get("result") == fusion:
@@ -1295,24 +1452,31 @@ def open_rpg_ui_window():
                         if fusion not in all_items:
                             all_items.append(fusion)
 
-        for item in all_items:
+        item_counts = Counter(all_items)
+        unique_items = sorted(item_counts.keys())
+
+        for item in unique_items:
             if item in itemshop_items or item in fusion_results:
-                frame = tk.Frame(right_frame, bd=1, relief=tk.SOLID)
-                frame.pack(pady=3, fill=tk.X)
+                frame = tk.Frame(center_frame, bd=1, relief=tk.SOLID, bg="#23272e")
+                frame.pack(pady=3, fill=tk.X, padx=10)
                 item_frames.append(frame)
-                tk.Label(frame, text=item, font=("Verdana", 10)).pack(anchor="w")
+                # Item name + count
+                display_name = f"{item} x{item_counts[item]}" if item_counts[item] > 1 else item
+                tk.Label(frame, text=display_name, font=("Verdana", 11, "bold"), fg="#eeeeee", bg="#23272e").pack(side=tk.LEFT, padx=5)
                 tk.Button(
                     frame,
                     text="Utiliser sur soi",
                     font=("Verdana", 9),
+                    bg="#00ff99", fg="#23272e", activebackground="#00cc77",
                     command=lambda i=item: use_item(i, target="self")
-                ).pack(pady=2, side=tk.LEFT)
+                ).pack(pady=2, side=tk.LEFT, padx=5)
                 tk.Button(
                     frame,
                     text="Jeter sur l'ennemi",
                     font=("Verdana", 9),
+                    bg="#ff5555", fg="#23272e", activebackground="#cc2222",
                     command=lambda i=item: use_item(i, target="enemy")
-                ).pack(pady=2, side=tk.LEFT)
+                ).pack(pady=2, side=tk.LEFT, padx=5)
 
     def use_item(item, target="self"):
         disable_all_actions()
@@ -1343,10 +1507,11 @@ def open_rpg_ui_window():
                 if etype == "heal":
                     heal_value = eff.get("value", 0)
                     if tgt == "self":
-                        player_hp["value"] = min( player_hp["value"] + heal_value, player_stats["max_hp"])
+                        player_hp["value"] = min(player_stats["max_hp"], player_hp["value"] + heal_value)
                         log_message(f"🧪 Vous récupérez {heal_value} PV.")
                     else:
-                        enemy_hp["value"] = min(current_enemy.get("hp", 100), enemy_hp["value"] + heal_value)
+                        max_enemy_hp = current_enemy.get("hp", 100)
+                        enemy_hp["value"] = min(max_enemy_hp, enemy_hp["value"] + heal_value)
                         log_message(f"Vous soignez {current_enemy['name']} de {heal_value} PV.")
                 elif etype == "ressource_refill":
                     value = eff.get("value", 0)
@@ -1406,21 +1571,23 @@ def open_rpg_ui_window():
                 player_hp["value"] = min(player_stats["max_hp"], player_hp["value"] + 25)
                 log_message("🧪 Vous buvez une potion de soin et récupérez 25 PV.")
             else:
-                enemy_hp["value"] = min(current_enemy.get("hp", 100), enemy_hp["value"] + 25)
+                max_enemy_hp = current_enemy.get("hp", 100)
+                enemy_hp["value"] = min(max_enemy_hp, enemy_hp["value"] + 25)
                 log_message(f"Vous lancez une potion de soin sur {current_enemy['name']} et il récupère 25 PV.")
         elif item == "Potion de soin supérieure":
             if target == "self":
                 player_hp["value"] = min(player_stats["max_hp"], player_hp["value"] + 50)
                 log_message("🧪 Vous buvez une potion de soin supérieure et récupérez 50 PV.")
             else:
-                enemy_hp["value"] = min(current_enemy.get("hp", 100), enemy_hp["value"] + 50)
+                max_enemy_hp = current_enemy.get("hp", 100)
+                enemy_hp["value"] = min(max_enemy_hp, enemy_hp["value"] + 50)
                 log_message(f"Vous lancez une potion de soin supérieure sur {current_enemy['name']} et il récupère 50 PV.")
         elif item == "Potion de mana":
-                if target == "self":
-                    player_mana["value"] = min(player_stats["max_mana"], player_mana["value"] + 50)
-                    log_message("🧪 Vous buvez une potion de mana et récupérez 50 de mana.")
-                else:
-                    log_message(f"🤷 Vous jetez une potion de mana sur {current_enemy['name']}. Aucun effet.")
+            if target == "self":
+                player_mana["value"] = min(player_stats["max_mana"], player_mana["value"] + 50)
+                log_message("🧪 Vous buvez une potion de mana et récupérez 50 de mana.")
+            else:
+                log_message(f"🤷 Vous jetez une potion de mana sur {current_enemy['name']}. Aucun effet.")
         elif item == "Potion de poison":
             if target == "self":
                 player_hp["value"] -= 25
@@ -1461,13 +1628,14 @@ def open_rpg_ui_window():
         else:
             log_message(f"❓ {item} n'a pas encore d'effet implémenté.")
 
-    def continue_after_delay():
-        enemy_attack()
-        update_bars()
-        update_status_display()
-        rpg_window.after(1500, enable_all_actions)
+        # Continue combat after item use
+        def continue_after_delay():
+            enemy_attack()
+            update_bars()
+            update_status_display()
+            rpg_window.after(1500, enable_all_actions)
 
-    rpg_window.after(1000, continue_after_delay)
+        rpg_window.after(1000, continue_after_delay)
 
     def attack():
         disable_all_actions()
@@ -1500,11 +1668,15 @@ def open_rpg_ui_window():
 
         rpg_window.after(1000, continue_after_delay)
 
-    attack_button = tk.Button(combat_frame, text="Attaque basique", font=("Verdana", 12), command=attack)
+
+    # --- Action Buttons ---
+    action_frame = tk.Frame(center_frame, bg="#181a20")
+    action_frame.pack(pady=10)
+    attack_button = tk.Button(action_frame, text="Attaque basique", font=("Verdana", 13, "bold"), bg="#4444ff", fg="#fff", activebackground="#222288", width=20, command=attack)
     attack_button.pack(pady=5)
 
     update_skills_display()
-    tk.Label(right_frame, text="Objets disponibles", font=("Verdana", 12, "bold")).pack(pady=5)
+    tk.Label(center_frame, text="Objets disponibles", font=("Verdana", 12, "bold"), fg="#ffaa00", bg="#181a20").pack(pady=5)
     update_item_display()
 
     # start the first fight (will use start_hp/start_mana/start_fatigue)
@@ -1513,8 +1685,8 @@ def open_rpg_ui_window():
 def open_upgrade_window():
     upgrade_window = tk.Toplevel(window)
     upgrade_window.title("📈 Améliorations")
-    upgrade_window.geometry("420x500")
-    upgrade_window.configure(bg="#f1f1f1")
+    upgrade_window.geometry(f"{WINDOW_WIDTH_UPGRADE}x{WINDOW_HEIGHT_UPGRADE}")
+    upgrade_window.configure(bg=COLOR_LIGHT_BG_LIGHT)
     upgrade_window.transient(window)
     upgrade_window.grab_set()
     upgrade_window.focus_set()
@@ -1591,197 +1763,133 @@ initialize_save()  # ensures money and stats exist
 # Main window
 window = tk.Tk()
 window.title("Project RPG")
-window.geometry("1200x900")
-window.configure(bg="#0a0a0a")
+window.geometry(f"{WINDOW_WIDTH_MAIN}x{WINDOW_HEIGHT_MAIN}")
+window.configure(bg=COLOR_BACKGROUND_DARK)
 
 # ═════════════════════════════════════════════════════════════════════════════
 # HEADER - Dramatic RPG Title with Visual Effects
 # ═════════════════════════════════════════════════════════════════════════════
-header_frame = tk.Frame(window, bg="#1a0f2e", height=140)
+header_frame = tk.Frame(window, bg=COLOR_HEADER_BG, height=HEADER_HEIGHT)
 header_frame.pack(fill=tk.X, padx=0, pady=0)
 header_frame.pack_propagate(False)
 
 # Decorative top border
-top_border = tk.Frame(header_frame, bg="#ffd700", height=3)
+top_border = tk.Frame(header_frame, bg=COLOR_HEADER_ACCENT, height=BORDER_HEIGHT)
 top_border.pack(fill=tk.X)
 
 # Main title with dramatic styling
-title_frame = tk.Frame(header_frame, bg="#1a0f2e")
+title_frame = tk.Frame(header_frame, bg=COLOR_HEADER_BG)
 title_frame.pack(fill=tk.BOTH, expand=True)
 
 # Decorative shields and divider
-title_label = tk.Label(title_frame, text="⚔️  ═══════════════════════════════════  ⚔️", 
-                       font=("Courier", 12, "bold"), fg="#ffd700", bg="#1a0f2e")
+title_label = tk.Label(title_frame, text=f"{DECORATIVE_SWORD}  {DECORATIVE_HORIZONTAL}  {DECORATIVE_SWORD}", 
+                       font=FONT_TITLE_LARGE, fg=COLOR_HEADER_ACCENT, bg=COLOR_HEADER_BG)
 title_label.pack(pady=5)
 
 # Main title
 main_label = tk.Label(title_frame, text="PROJECT RPG", 
-                      font=("Courier", 36, "bold"), 
-                      fg="#ffed4e", bg="#1a0f2e")
+                      font=FONT_TITLE_MAIN, 
+                      fg=COLOR_TEXT_GOLD, bg=COLOR_HEADER_BG)
 main_label.pack(pady=0)
 
 # Subtitle
 version_label = tk.Label(title_frame, text=f"[ Version {CURRENT_VERSION} - {VERSION_NAME} ]", 
-                        font=("Courier", 10, "italic"), fg="#a0a0a0", bg="#1a0f2e")
+                        font=FONT_VERSION, fg=COLOR_TEXT_DARK_GRAY, bg=COLOR_HEADER_BG)
 version_label.pack(pady=2)
 
 # Decorative bottom
-bottom_divider = tk.Label(title_frame, text="⚔️  ═══════════════════════════════════  ⚔️", 
-                          font=("Courier", 12, "bold"), fg="#ffd700", bg="#1a0f2e")
+bottom_divider = tk.Label(title_frame, text=f"{DECORATIVE_SWORD}  {DECORATIVE_HORIZONTAL}  {DECORATIVE_SWORD}", 
+                          font=FONT_TITLE_LARGE, fg=COLOR_HEADER_ACCENT, bg=COLOR_HEADER_BG)
 bottom_divider.pack(pady=5)
 
 # ═════════════════════════════════════════════════════════════════════════════
 # PLAYER STATS BAR
 # ═════════════════════════════════════════════════════════════════════════════
-stats_frame = tk.Frame(window, bg="#0d0d0d", height=60)
+stats_frame = tk.Frame(window, bg=COLOR_BACKGROUND_VERY_DARK, height=STATS_BAR_HEIGHT)
 stats_frame.pack(fill=tk.X, padx=0, pady=0)
 stats_frame.pack_propagate(False)
 
 # Stats bar background with border
-stats_container = tk.Frame(stats_frame, bg="#1a1a1a", relief=tk.RAISED, bd=2)
+stats_container = tk.Frame(stats_frame, bg=COLOR_STATS_BG, relief=tk.RAISED, bd=2)
 stats_container.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
 # Left stats
-left_stats = tk.Frame(stats_container, bg="#1a1a1a")
+left_stats = tk.Frame(stats_container, bg=COLOR_STATS_BG)
 left_stats.pack(side=tk.LEFT, padx=15, fill=tk.Y, expand=True)
 
-player_name_label = tk.Label(left_stats, text="", font=("Courier", 12, "bold"), 
-                            fg="#00ff00", bg="#1a1a1a")
+player_name_label = tk.Label(left_stats, text="", font=FONT_TITLE_LARGE, 
+                            fg=COLOR_TEXT_GREEN, bg=COLOR_STATS_BG)
 player_name_label.pack(side=tk.LEFT, padx=10)
 
 # Center divider
-divider = tk.Label(stats_container, text="│", font=("Courier", 16), fg="#666666", bg="#1a1a1a")
+divider = tk.Label(stats_container, text=DECORATIVE_DIVIDER, font=("Courier", 16), fg="#666666", bg=COLOR_STATS_BG)
 divider.pack(side=tk.LEFT, padx=10)
 
 # Right stats
-right_stats = tk.Frame(stats_container, bg="#1a1a1a")
+right_stats = tk.Frame(stats_container, bg=COLOR_STATS_BG)
 right_stats.pack(side=tk.RIGHT, padx=15, fill=tk.Y, expand=True)
 
 main_money_label = tk.Label(right_stats, text=f"💰 {money} deullars", 
-                           font=("Courier", 12, "bold"), 
-                           fg="#ffd700", bg="#1a1a1a")
+                           font=FONT_TITLE_LARGE, 
+                           fg=COLOR_HEADER_ACCENT, bg=COLOR_STATS_BG)
 main_money_label.pack(side=tk.RIGHT, padx=10)
 
 # ═════════════════════════════════════════════════════════════════════════════
 # MAIN CONTENT AREA
 # ═════════════════════════════════════════════════════════════════════════════
-content_frame = tk.Frame(window, bg="#0a0a0a")
+content_frame = tk.Frame(window, bg=COLOR_BACKGROUND_DARK)
 content_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
 # Conteneur pour organiser les catégories en grille 2x2
-buttons_frame = tk.Frame(content_frame, bg="#0a0a0a")
+buttons_frame = tk.Frame(content_frame, bg=COLOR_BACKGROUND_DARK)
 buttons_frame.pack(fill=tk.BOTH, expand=True)
 
-def styled_frame(parent, title, bg_color, border_color, accent_color="#ffd700"):
-    # Outer frame for border effect
-    outer = tk.Frame(parent, bg=border_color, relief=tk.RAISED, bd=3)
-    outer.pack(side=tk.LEFT, padx=8, pady=8, fill=tk.BOTH, expand=True)
-    
-    # Inner frame with actual content
-    inner = tk.Frame(outer, bg=bg_color, padx=12, pady=12)
-    inner.pack(fill=tk.BOTH, expand=True, padx=2, pady=2)
-    
-    # Top decorative line
-    top_line = tk.Label(inner, text="━━━━━━━━━━━━━━━━━━━━━━━━", 
-                       font=("Courier", 9), fg=accent_color, bg=bg_color)
-    top_line.pack(pady=(0, 8))
-    
-    # Title with fancy styling
-    title_label = tk.Label(inner, text=title, font=("Courier", 12, "bold"), 
-                          fg=accent_color, bg=bg_color)
-    title_label.pack(pady=(0, 10))
-    
-    # Bottom decorative line
-    bottom_line = tk.Label(inner, text="━━━━━━━━━━━━━━━━━━━━━━━━", 
-                          font=("Courier", 9), fg=accent_color, bg=bg_color)
-    bottom_line.pack(pady=(0, 12))
-    
-    return inner
-
-def create_button(parent, text, command, color="button_bg"):
-    color_map = {
-        "merchant": "#8b5a00",
-        "player": "#004a8f",
-        "combat": "#8b0000",
-        "magic": "#663399",
-        "neutral": "#444444",
-        "danger": "#b32222"
-    }
-    
-    btn = tk.Button(parent, 
-                   text=text, 
-                   font=("Courier", 9, "bold"),
-                   bg=color_map.get(color, "#444444"),
-                   fg="#ffffff",
-                   activebackground="#ffdd00",
-                   activeforeground="#000000",
-                   relief=tk.RAISED,
-                   bd=2,
-                   padx=10,
-                   pady=10,
-                   highlightthickness=1,
-                   highlightbackground="#666666",
-                   command=command)
-    btn.pack(pady=7, fill=tk.X, expand=False)
-    
-    # Add hover effects
-    def on_enter(event):
-        btn.config(bd=3, relief=tk.SUNKEN)
-    
-    def on_leave(event):
-        btn.config(bd=2, relief=tk.RAISED)
-    
-    btn.bind("<Enter>", on_enter)
-    btn.bind("<Leave>", on_leave)
-    
-    return btn
-
 # Row 1
-row1_frame = tk.Frame(buttons_frame, bg="#0a0a0a")
+row1_frame = tk.Frame(buttons_frame, bg=COLOR_BACKGROUND_DARK)
 row1_frame.pack(fill=tk.BOTH, expand=True)
 
 # ----- Catégorie 1 : Marchands -----
-merchants_frame = styled_frame(row1_frame, "🏪 MARCHANDS 🏪", "#1a1a1a", "#8b6f47", "#daa520")
+merchants_frame = styled_frame(row1_frame, "🏪 MARCHANDS 🏪", "#1a1a1a", COLOR_BORDER_GOLD, "#daa520")
 create_button(merchants_frame, "⚔️  Entraîneur militaire", open_military_window, "merchant")
 create_button(merchants_frame, "🗡️  Marchand militaire", open_milishop_window, "merchant")
 create_button(merchants_frame, "🔮  Maître magicien", open_magic_window, "magic")
 create_button(merchants_frame, "🧪  Marchand d'objets", open_itemshop_window, "merchant")
 
 # ----- Catégorie 2 : Joueur -----
-player_frame = styled_frame(row1_frame, "👤 JOUEUR 👤", "#0a1a2a", "#0066cc", "#4da6ff")
+player_frame = styled_frame(row1_frame, "👤 JOUEUR 👤", COLOR_PLAYER_SECTION_BG, COLOR_BORDER_BLUE, COLOR_PLAYER_ACCENT)
 create_button(player_frame, "✨  Fusion de compétences", open_skills_creation_window, "magic")
 create_button(player_frame, "📖  Inventaire", open_inventaire_window, "player")
 create_button(player_frame, "📈  Améliorer les stats", open_upgrade_window, "player")
 create_button(player_frame, "😴  Se reposer à l'auberge", inn_rest, "neutral")
 
 # Row 2
-row2_frame = tk.Frame(buttons_frame, bg="#0a0a0a")
+row2_frame = tk.Frame(buttons_frame, bg=COLOR_BACKGROUND_DARK)
 row2_frame.pack(fill=tk.BOTH, expand=True)
 
 # ----- Catégorie 3 : Combat et Quêtes -----
-combat_frame = styled_frame(row2_frame, "⚔️  AVENTURE  ⚔️", "#2a0a0a", "#660000", "#ff6b6b")
+combat_frame = styled_frame(row2_frame, "⚔️  AVENTURE  ⚔️", COLOR_COMBAT_SECTION_BG, COLOR_BORDER_DARK, COLOR_COMBAT_ACCENT)
 create_button(combat_frame, "🗡️  Partir à l'attaque", open_rpg_ui_window, "combat")
 create_button(combat_frame, "📜  Quêtes", open_rpg_quests_window, "combat")
 create_button(combat_frame, "🗺️  Carte du monde (WIP)", open_rpg_ui_map_window, "neutral")
 
 # ----- Catégorie 4 : Options -----
-options_frame = styled_frame(row2_frame, "⚙️  OPTIONS  ⚙️", "#1a1a2a", "#444444", "#888888")
+options_frame = styled_frame(row2_frame, "⚙️  OPTIONS  ⚙️", COLOR_OPTIONS_SECTION_BG, COLOR_BORDER_GRAY, COLOR_OPTIONS_ACCENT)
 create_button(options_frame, "💾  Sauvegarder la partie", save_game, "neutral")
 create_button(options_frame, "🔄  Réinitialiser le jeu", reset_game, "danger")
 
 # ═════════════════════════════════════════════════════════════════════════════
 # FOOTER
 # ═════════════════════════════════════════════════════════════════════════════
-footer_frame = tk.Frame(window, bg="#0d0d0d", height=40)
+footer_frame = tk.Frame(window, bg=COLOR_BACKGROUND_VERY_DARK, height=FOOTER_HEIGHT)
 footer_frame.pack(fill=tk.X, side=tk.BOTTOM, padx=0, pady=0)
 footer_frame.pack_propagate(False)
 
 # Bottom border
-bottom_border = tk.Frame(footer_frame, bg="#ffd700", height=3)
+bottom_border = tk.Frame(footer_frame, bg=COLOR_HEADER_ACCENT, height=BORDER_HEIGHT)
 bottom_border.pack(fill=tk.X)
 
-footer_label = tk.Label(footer_frame, text="⚔️  Un jeu par Eazeon  ⚔️", 
-                       font=("Courier", 9, "italic"), fg="#888888", bg="#0d0d0d")
+footer_label = tk.Label(footer_frame, text=f"{DECORATIVE_SWORD}  Un jeu par Eazeon  {DECORATIVE_SWORD}", 
+                       font=FONT_DECORATIVE_SMALL, fg=COLOR_OPTIONS_ACCENT, bg=COLOR_BACKGROUND_VERY_DARK)
 footer_label.pack(pady=3)
 
 # ═════════════════════════════════════════════════════════════════════════════

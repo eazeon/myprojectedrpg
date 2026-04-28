@@ -1,19 +1,95 @@
 import tkinter as tk
+import importlib.util
+import os
 from tkinter import messagebox
 import random
 import os
 import csv
 
 from fusion_recipes_lists import fusion_recipes
-from enemy_types_lists import enemy_types
-from quests_list import quests
-from gui_appearance import *
 
-CURRENT_VERSION = "0.3.1"
+CURRENT_VERSION = "0.3.2"
 VERSION_NAME = "Pre-Alpha - Éveil des compétences"
 
 SAVE_FILE = "save.csv"
 player_name = ""
+
+skills_and_magics_data_path = os.path.join(os.path.dirname(__file__), "skills_and_magics_data.py")
+skills_and_magics = []
+if os.path.exists(skills_and_magics_data_path):
+    spec = importlib.util.spec_from_file_location("skills_and_magics_data", skills_and_magics_data_path)
+    skills_mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(skills_mod)
+    skills_and_magics = getattr(skills_mod, "skills_and_magics", [])
+
+def get_skill_description(name):
+    for entry in skills_and_magics:
+        if entry.get("name") == name:
+            return entry.get("description", "")
+    return ""
+
+
+class ToolTip:
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tipwindow = None
+        self.id = None
+        widget.bind("<Enter>", self.enter)
+        widget.bind("<Leave>", self.leave)
+        widget.bind("<Motion>", self.motion)
+        self.last_motion = None
+
+    def enter(self, event=None):
+        self.schedule(event)
+
+    def leave(self, event=None):
+        self.unschedule()
+        self.hidetip()
+
+    def motion(self, event):
+        self.last_motion = event
+        if self.tipwindow:
+            x = event.x_root + 20
+            y = event.y_root + 10
+            self.tipwindow.wm_geometry(f"+{x}+{y}")
+
+    def schedule(self, event=None):
+        self.unschedule()
+        self.id = self.widget.after(400, lambda: self.showtip(self.last_motion))
+
+    def unschedule(self):
+        id_ = self.id
+        self.id = None
+        if id_:
+            self.widget.after_cancel(id_)
+
+    def showtip(self, event=None):
+        if self.tipwindow:
+            return
+        x = y = 0
+        if event:
+            x = event.x_root + 20
+            y = event.y_root + 10
+        else:
+            x = self.widget.winfo_rootx() + 40
+            y = self.widget.winfo_rooty() + 10
+        self.tipwindow = tw = tk.Toplevel(self.widget)
+        tw.wm_overrideredirect(1)
+        tw.wm_geometry(f"+{x}+{y}")
+        label = tk.Label(tw, text=self.text, justify=tk.LEFT,
+                         background="#ffffe0", relief=tk.SOLID, borderwidth=1,
+                         font=("tahoma", "9", "normal"), wraplength=320)
+        label.pack(ipadx=4, ipady=2)
+
+    def hidetip(self):
+        tw = self.tipwindow
+        self.tipwindow = None
+        if tw:
+            tw.destroy()
+from enemy_types_lists import enemy_types
+from quests_list import quests
+from gui_appearance import *
 
 def safe_int(value, default=0):
     try:
@@ -378,7 +454,7 @@ def open_inventaire_window():
 
 
 class ShopWindow:
-    def __init__(self, title, button_texts):
+    def __init__(self, title, button_texts=None):
         self.window = tk.Toplevel(window)
         self.window.title(title)
         self.window.geometry(f"{WINDOW_WIDTH_SHOP}x{WINDOW_HEIGHT_SHOP}")
@@ -394,18 +470,42 @@ class ShopWindow:
         frame = tk.Frame(self.window, bg=COLOR_LIGHT_BG_CREAM)
         frame.pack(pady=5)
 
-        for text in button_texts:
-            item_name, cost = text.split(" : ")
-            cost = int(cost)
+        # If button_texts is None, use skills_and_magics_data for available skills/magics
+        items_to_sell = []
+        if button_texts is not None:
+            # Legacy: parse as before
+            for text in button_texts:
+                item_name, cost = text.split(" : ")
+                cost = int(cost)
+                desc = get_skill_description(item_name)
+                items_to_sell.append({"name": item_name, "cost": cost, "desc": desc})
+        else:
+            # Use all skills/magics from data file, assign a default cost (or you can add a 'cost' field in the data file)
+            default_cost = 100
+            for entry in skills_and_magics:
+                items_to_sell.append({
+                    "name": entry.get("name", "?"),
+                    "cost": entry.get("cost", default_cost),
+                    "desc": entry.get("description", "")
+                })
+
+        for item in items_to_sell:
+            # Multi-line button: name (big), description (small), cost
+            btn_text = f"{item['name']}\n"
+            if item['desc']:
+                btn_text += f"\n{item['desc']}\n"
+            btn_text += f"\n{item['cost']} 💰"
             btn = tk.Button(
                 frame,
-                text=f"{item_name} - {cost} 💰",
-                font=FONT_WINDOW_TINY,
+                text=btn_text,
+                font=("Verdana", 11),
                 width=40,
                 bg="#f0e6d6",
-                command=lambda t=item_name, c=cost: self.handle_purchase(t, c)
+                justify="left",
+                anchor="w",
+                command=lambda t=item['name'], c=item['cost']: self.handle_purchase(t, c)
             )
-            btn.pack(pady=4)
+            btn.pack(pady=4, fill="x")
 
 
     def handle_purchase(self, item_name, cost):
@@ -780,6 +880,8 @@ def open_custom_skill_window():
 
     tk.Label(left_frame, text="Magies disponibles", font=FONT_LABEL_BOLD, bg=COLOR_LIGHT_BG_BLUE).pack(pady=5)
 
+
+    # --- Gather available magics and skills ---
     available_spells = []
     for fusion in fusion_results:
         for key, val in fusion_recipes.items():
@@ -789,7 +891,7 @@ def open_custom_skill_window():
                     available_spells.append(fusion)
                 break
 
-    # Also include magics purchased from the Maître Magicien
+    # Magics purchased from Maître Magicien
     magic_keywords = [
         "Magie élémentaire Feu", "Magie élémentaire Air", "Magie élémentaire Eau",
         "Magie élémentaire Terre", "Magie d'illusion", "Magie psychique"
@@ -798,7 +900,16 @@ def open_custom_skill_window():
         if item in magic_keywords and item not in available_spells:
             available_spells.append(item)
 
-    # Scrollable list of spells
+    # --- Military trainer skills ---
+    military_skills = [
+        "Coup simple", "Coup puissant", "Parade", "Attaque circulaire", "Charge", "Riposte"
+    ]
+    available_military_skills = []
+    for item in purchased_items:
+        if item in military_skills and item not in available_military_skills:
+            available_military_skills.append(item)
+
+    # --- UI for spells/skills selection ---
     spell_canvas = tk.Canvas(left_frame, bg=COLOR_LIGHT_BG, highlightthickness=1, height=400)
     spell_scrollbar = tk.Scrollbar(left_frame, orient="vertical", command=spell_canvas.yview)
     spell_frame = tk.Frame(spell_canvas, bg=COLOR_LIGHT_BG)
@@ -809,42 +920,118 @@ def open_custom_skill_window():
     spell_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
     spell_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-    # State for selected spell and intensity
-    selected_spell = {"name": None, "mana_cost": 25, "intensity": "normal"}
+    # State for selected spells/skills (now up to 2)
+    selected_spells = []  # List of up to 2
+
+    def update_selected_spells_label():
+        if not selected_spells:
+            spell_name_label.config(text="Aucun sortilège/compétence sélectionné")
+        else:
+            spell_name_label.config(text="Sélection : " + " + ".join(selected_spells))
 
     def select_spell(spell_name):
-        selected_spell["name"] = spell_name
-        spell_name_label.config(text=f"Sortilège sélectionné : {spell_name}")
+        if spell_name in selected_spells:
+            selected_spells.remove(spell_name)
+        elif len(selected_spells) < 2:
+            selected_spells.append(spell_name)
+        else:
+            messagebox.showwarning("Limite atteinte", "Vous ne pouvez sélectionner que deux magies/compétences.")
+        update_selected_spells_label()
         mana_slider.set(25)  # Reset to default
 
-    # Create spell buttons
-    if available_spells:
-        for spell in sorted(set(available_spells)):
+
+    # --- Combined magics and military skills section with tooltips ---
+    combined_skills = []
+    for spell in sorted(set(available_spells)):
+        combined_skills.append((spell, "magic"))
+    for skill in sorted(set(available_military_skills)):
+        combined_skills.append((skill, "physical"))
+
+    if combined_skills:
+        tk.Label(spell_frame, text="Magies et compétences apprises", font=FONT_LABEL_BOLD, bg=COLOR_LIGHT_BG).pack(pady=(5, 0), anchor="w")
+        for name, typ in combined_skills:
             btn = tk.Button(
                 spell_frame,
-                text=f"• {spell}",
+                text=f"• {name}",
                 font=FONT_WINDOW_SMALL,
-                bg="#ffe6cc",
+                bg="#ffe6cc" if typ == "magic" else "#e6ffe6",
                 anchor="w",
-                command=lambda s=spell: select_spell(s)
+                command=lambda s=name: select_spell(s)
             )
-            btn.pack(fill=tk.X, pady=3, padx=5)
+            btn.pack(fill=tk.X, pady=2, padx=5)
+            desc = get_skill_description(name)
+            if desc:
+                ToolTip(btn, desc)
     else:
-        tk.Label(spell_frame, text="Aucune magie disponible", 
-                font=FONT_WINDOW_SMALL, bg=COLOR_LIGHT_BG).pack(pady=20)
+        tk.Label(spell_frame, text="Aucune magie ou compétence disponible", font=FONT_WINDOW_SMALL, bg=COLOR_LIGHT_BG).pack(pady=5)
+
+
+    # --- Intensity options as buttons ---
+    tk.Label(spell_frame, text="Intensité", font=FONT_LABEL_BOLD, bg=COLOR_LIGHT_BG).pack(pady=(10, 0), anchor="w")
+    intensity_options = [
+        ("⚡ Normal", "normal"),
+        ("💥 Amplified Cast", "amplified cast")
+    ]
+    intensity_selected = tk.StringVar(value="normal")
+    intensity_btns = []
+    intensity_btn_frame = tk.Frame(spell_frame, bg=COLOR_LIGHT_BG)
+    intensity_btn_frame.pack(fill=tk.X, padx=5, pady=2)
+    def set_intensity(val):
+        intensity_selected.set(val)
+        for btn, (_, v) in zip(intensity_btns, intensity_options):
+            btn.config(relief=tk.SUNKEN if v == val else tk.RAISED)
+    for text, val in intensity_options:
+        btn = tk.Button(
+            intensity_btn_frame,
+            text=text,
+            font=FONT_WINDOW_SMALL,
+            width=16,
+            relief=tk.SUNKEN if val == intensity_selected.get() else tk.RAISED,
+            command=lambda v=val: set_intensity(v),
+            bg="#ddeeff" if val == "normal" else "#ffddee"
+        )
+        btn.pack(side=tk.LEFT, padx=5, pady=2)
+        intensity_btns.append(btn)
+
+    # --- Special box for quick/prolonged cast ---
+    tk.Label(spell_frame, text="Spécial", font=FONT_LABEL_BOLD, bg=COLOR_LIGHT_BG).pack(pady=(10, 0), anchor="w")
+    special_frame = tk.Frame(spell_frame, bg=COLOR_LIGHT_BG)
+    special_frame.pack(fill=tk.X, padx=5, pady=2)
+    special_options = ["Quick Cast", "Prolonged Cast"]
+    special_selected = tk.StringVar(value="")
+    special_btns = []
+    def set_special(val):
+        special_selected.set(val)
+        for btn, v in zip(special_btns, special_options):
+            btn.config(relief=tk.SUNKEN if v == val else tk.RAISED)
+    for opt in special_options:
+        btn = tk.Button(
+            special_frame,
+            text=opt,
+            font=FONT_WINDOW_SMALL,
+            width=16,
+            relief=tk.SUNKEN if opt == special_selected.get() else tk.RAISED,
+            command=lambda v=opt: set_special(v),
+            bg="#eaffea" if opt == "Quick Cast" else "#ffeaea"
+        )
+        btn.pack(side=tk.LEFT, padx=5, pady=2)
+        special_btns.append(btn)
+
+    # --- End spells/skills selection UI ---
+
 
     # Right side: Spell configuration
     right_frame = tk.Frame(main_container, bg=COLOR_LIGHT_BG_BLUE)
     right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5)
 
-    # Selected spell display
-    spell_name_label = tk.Label(right_frame, text="Aucun sortilège sélectionné", 
+    # Selected spells/skills display
+    spell_name_label = tk.Label(right_frame, text="Aucun sortilège/compétence sélectionné", 
                                font=FONT_LABEL_BOLD, bg=COLOR_LIGHT_BG_BLUE, wraplength=250, justify="center")
     spell_name_label.pack(pady=10, fill=tk.X)
 
+
     # Mana cost slider
     tk.Label(right_frame, text="Coût en mana", font=FONT_LABEL_BOLD, bg=COLOR_LIGHT_BG_BLUE).pack(pady=(15, 5))
-    
     mana_slider_frame = tk.Frame(right_frame, bg=COLOR_LIGHT_BG_BLUE)
     mana_slider_frame.pack(pady=5, fill=tk.X, padx=10)
 
@@ -862,43 +1049,21 @@ def open_custom_skill_window():
 
     mana_slider.config(command=update_mana_label)
 
-    # Spell intensity selector
-    tk.Label(right_frame, text="Intensité du sortilège", font=FONT_LABEL_BOLD, bg=COLOR_LIGHT_BG_BLUE).pack(pady=(15, 5))
-    
-    intensity_frame = tk.Frame(right_frame, bg=COLOR_LIGHT_BG_BLUE)
-    intensity_frame.pack(pady=5, padx=10, fill=tk.X)
 
-    intensity_var = tk.StringVar(value="normal")
 
-    intensity_options = [
-        ("⚡ Normal", "normal"),
-        ("💨 Quick Cast", "quick cast"),
-        ("💥 Amplified Cast", "amplified cast")
-    ]
+    # (Removed intensity radio buttons from right panel)
 
-    for option_text, option_value in intensity_options:
-        rb = tk.Radiobutton(
-            intensity_frame,
-            text=option_text,
-            variable=intensity_var,
-            value=option_value,
-            font=FONT_WINDOW_SMALL,
-            bg=COLOR_LIGHT_BG_BLUE,
-            selectcolor="#ccffff"
-        )
-        rb.pack(anchor=tk.W, pady=3)
-        intensity_var.set("normal")
 
     # Spell name input
     tk.Label(right_frame, text="Nom du sortilège", font=FONT_LABEL_BOLD, bg=COLOR_LIGHT_BG_BLUE).pack(pady=(15, 5))
-    
     spell_name_input = tk.Entry(right_frame, font=FONT_WINDOW_SMALL, width=30)
     spell_name_input.pack(pady=5, padx=10, fill=tk.X)
 
     # Create button
+
     def create_custom_spell():
-        if not selected_spell["name"]:
-            messagebox.showwarning("Erreur", "Veuillez sélectionner un sortilège!")
+        if not selected_spells:
+            messagebox.showwarning("Erreur", "Veuillez sélectionner au moins une magie ou compétence!")
             return
 
         custom_name = spell_name_input.get().strip()
@@ -907,21 +1072,33 @@ def open_custom_skill_window():
             return
 
         mana_cost = int(mana_slider.get())
-        intensity = intensity_var.get()
+        intensity = intensity_selected.get()
+        special = special_selected.get()
+
+        # Compose the base string
+        base_str = " + ".join(selected_spells)
+        if special:
+            base_str += f" [{special}]"
 
         # Create the custom spell and add to fusion_results
-        custom_spell_name = f"{custom_name} ({selected_spell['name']}, {mana_cost}M, {intensity})"
-        
+        custom_spell_name = f"{custom_name} ({base_str}, {mana_cost}M, {intensity})"
+
         if custom_spell_name not in fusion_results:
             fusion_results.append(custom_spell_name)
             messagebox.showinfo("Succès", f"Sortilège créé : {custom_name}!\n"
-                              f"Base : {selected_spell['name']}\n"
+                              f"Base : {base_str}\n"
                               f"Coût : {mana_cost} mana\n"
-                              f"Intensité : {intensity}")
+                              f"Intensité : {intensity}\n"
+                              f"Spécial : {special if special else 'Aucun'}")
             spell_name_input.delete(0, tk.END)
-            selected_spell["name"] = None
-            spell_name_label.config(text="Aucun sortilège sélectionné")
-            intensity_var.set("normal")
+            selected_spells.clear()
+            update_selected_spells_label()
+            intensity_selected.set("normal")
+            for btn, (_, v) in zip(intensity_btns, intensity_options):
+                btn.config(relief=tk.SUNKEN if v == "normal" else tk.RAISED)
+            special_selected.set("")
+            for btn, v in zip(special_btns, special_options):
+                btn.config(relief=tk.RAISED)
             update_main_window()
             save_game()
         else:

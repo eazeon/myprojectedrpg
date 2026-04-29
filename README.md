@@ -15,24 +15,27 @@ Note sur l'IA : Oui j'ai utilisé l'IA pour générer du code, via ChatGPT. Je m
 ----------
 
 # Manuel de jeu
-Le but de ce jeu tourne autour de la mécanique de fusion.
+~~Le but de ce jeu tourne autour de la mécanique de fusion.
 Vous pouvez acheter des techniques de combat, des armes, des formes de magie et des objets. Ensuite libre à vous de choisir comment fusionner ces éléments.
-Voyez ce jeu comme un FTL : les actions vous sont décrites a l'écrit, a vous d'utiliser votre imagination pour visualiser ce qu'il se passe et façonner votre personnage !
+Voyez ce jeu comme un FTL : les actions vous sont décrites a l'écrit, a vous d'utiliser votre imagination pour visualiser ce qu'il se passe et façonner votre personnage !~~
 
-Exemple : fusionner la compétence "Coup simple" et "Magie élémentaire de feu" vous donne la compétence "Boule de feu simple".
-Je vous laisse découvrir les différentes fusions et vous amuser avec ;)
+~~Exemple : fusionner la compétence "Coup simple" et "Magie élémentaire de feu" vous donne la compétence "Boule de feu simple".
+Je vous laisse découvrir les différentes fusions et vous amuser avec ;)~~
 
-De même, vous avez des objets consommables à votre disposition que vous pouvez aussi fusionner pour de nouveaux effets.
+~~De même, vous avez des objets consommables à votre disposition que vous pouvez aussi fusionner pour de nouveaux effets.~~
 
-Une fois paré au combat vous n'avez plus qu'a cliquer sur "Partir à l'attaque", ce qui déclenchera une phase de combat contre 5 ennemis aléatoires.
+~~Une fois paré au combat vous n'avez plus qu'a cliquer sur "Partir à l'attaque", ce qui déclenchera une phase de combat contre 5 ennemis aléatoires.
 Chaque ennemi est vulnérable à un type de dégâts (contondant, perçant, coupant, magique) et peut être résistant a un type de dégât en particulier.
 Battre un ennemi vous octroie des pièces et de l'XP globale.
 Utiliser une compétence physique vous octroie de l'XP de force et une compétence magique vous octroie de l'XP magique.
 Une fois les 5 ennemis battus, la fenêtre se ferme. Si vous êtes battus ou si vous quittez le combat (en fermant la fenêtre de combat), vous devrez d'abord vous reposer à l'auberge avant de repartir au combat sinon vous entrez au combat avec un malus de vie/mana/fatigue.
-Vous pouvez ensuite améliorer vos stats en cliquant sur le bouton assez explicite "Améliorer vos stats" où vous pourrez échanger de l'XP globale contre de la santé, de l'XP de force contre + de fatigue max ou un boost de dégâts de force, et de l'XP magique pour améliorer votre mana max ou un boost de dégâts en magie.
+Vous pouvez ensuite améliorer vos stats en cliquant sur le bouton assez explicite "Améliorer vos stats" où vous pourrez échanger de l'XP globale contre de la santé, de l'XP de force contre + de fatigue max ou un boost de dégâts de force, et de l'XP magique pour améliorer votre mana max ou un boost de dégâts en magie.~~
 
-Vous pouvez aussi désormais accéder à certaines quêtes (deux pour le moment) grâce au bouton des quêtes!
-(more to come)
+~~Vous pouvez aussi désormais accéder à certaines quêtes (deux pour le moment) grâce au bouton des quêtes!
+(more to come)~~
+
+Rework des compétences en cours
+:)
 
 ----------
 
